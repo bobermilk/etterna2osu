@@ -29,6 +29,8 @@ def cleanup():
         shutil.rmtree(folder)
 
 def main():
+    # TODO: check with guil
+    os.system('mode con: cols=100 lines=40')
     if os.name == "nt":
         import ctypes
         kernel32 = ctypes.WinDLL('kernel32')
@@ -76,10 +78,11 @@ def main():
         print("Invalid HP, defaulting to HP 7")
         HP=7
     print()
-    creator=input("Enter the name you want as the creator of the converts >> ")
-    if not creator:
-        print("Invalid creator, defaulting to bobermilk")
-        creator="bobermilk"
+    # creator=input("Enter the name you want as the creator of the converts >> ")
+    # if not creator:
+    #     print("Invalid creator, defaulting to bobermilk")
+    #     creator="bobermilk"
+    creator="bobermilk"
     print()
     user_offset=input("Integer offset to be applied to all converted maps in milliseconds (positive offset means notes come later) >> ")
     if not user_offset:
@@ -209,7 +212,14 @@ def main():
                                     edit.write(f[j])
                                     while j<len(f) and "," not in f[j]:
                                         j+=1
-                                    edit.write(f[j]) #write the first timing point
+                                    timing=f[j].split(",")
+                                    timing[0]+=offset
+                                    timing_point=""
+                                    for pt in timing:
+                                        timing_point+=pt
+                                        timing_point+=","
+                                    timing_point=timing_point[:-1]
+                                    edit.write(timing_point) #write the first timing point
                                     edit.write("\n")
                                     while j<len(f) and "," in f[j]:
                                         j+=1
