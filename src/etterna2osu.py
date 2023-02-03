@@ -227,6 +227,9 @@ def main():
 
                                     edit.write("AudioFilename: "+audio_filename)
                                     edit.write("\n")
+                                elif f[j]=="Tags: ":
+                                    edit.write("Tags: etterna etterna2osu")
+                                    edit.write("\n")
                                 elif "OverallDifficulty" in f[j]:
                                     edit.write(f"OverallDifficulty: {OD}")
                                     edit.write("\n")
