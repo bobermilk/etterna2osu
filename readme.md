@@ -1,5 +1,6 @@
 # etterna2osu
 This tool converts etterna charts to osu maps. There is no offset issue :3
+
 Only windows is supported for now. linux/macos i'll write soon
 
 # How to run?

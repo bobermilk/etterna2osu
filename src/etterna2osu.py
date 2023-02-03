@@ -9,7 +9,7 @@ APP_VERSION=1
 TARGET_DIR="etterna2osu_song_packs"
 TERMINAL_WIDTH=os.get_terminal_size().columns
 
-offset=-8
+offset=-26
 failed=[]
 
 class bcolors:
@@ -29,14 +29,25 @@ def cleanup():
         shutil.rmtree(folder)
 
 def main():
+    if os.name == "nt":
+        import ctypes
+        kernel32 = ctypes.WinDLL('kernel32')
+        hStdOut = kernel32.GetStdHandle(-11)
+        mode = ctypes.c_ulong()
+        kernel32.GetConsoleMode(hStdOut, ctypes.byref(mode))
+        mode.value |= 4
+        kernel32.SetConsoleMode(hStdOut, mode)
+
     if not os.path.isdir(TARGET_DIR):
         os.mkdir(TARGET_DIR)
         
-    print(bcolors.HEADER+" "*int((TERMINAL_WIDTH-22)/2)+f"etterna2osu version {APP_VERSION}"+bcolors.ENDC)
+    print(bcolors.HEADER+" "*int((TERMINAL_WIDTH-27)/2)+f"etterna2osu v{APP_VERSION} by bobermilk"+bcolors.ENDC)
     print(bcolors.HEADER+" "*int((TERMINAL_WIDTH-39)/2)+"DM milk#6867 on discord for any queries"+bcolors.ENDC)
     print(bcolors.OKBLUE+" "*int((TERMINAL_WIDTH-78)/2)+bcolors.UNDERLINE+"Thank you demi, guil, marc, chxu, senya, gonx, messica for helping me make this"+bcolors.ENDC)
     print()
     print("You can obtain etterna packs zips at https://etternaonline.com/packs")
+    path = os.path.realpath(TARGET_DIR)
+    os.startfile(path)
     input("Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR))
     print()
     #TODO: check for folder and non zips
@@ -227,11 +238,11 @@ def main():
                                 elif not skip:
                                     edit.write(f[j])
                 if not stop:
-                    msg="Good"
+                    msg="[ Good ✓ ]"
                     print(chart+" "*(TERMINAL_WIDTH-len(chart)-len(msg)-1)+bcolors.OKGREEN+msg+bcolors.ENDC)
                 else:
                     failed.append(chart)
-                    print(chart+" "*(TERMINAL_WIDTH-len(chart)-5)+bcolors.FAIL+"Fail"+bcolors.ENDC)
+                    print(chart+"  "+bcolors.WARNING+"-"*(TERMINAL_WIDTH-len(chart)-16)+">  "+bcolors.FAIL+"[ Fail ✗ ]"+bcolors.ENDC)
                 os.chdir("..")
         # wrap things up and move them to output
         output=[f for f in os.listdir(".") if os.path.isfile(f)]
@@ -251,6 +262,6 @@ def main():
             print("    "+f"{i}. {chart}")
     print()
     print(f"Beatmaps files generated can be found in the {TARGET_DIR} folder")
-    print(bcolors.OKGREEN+"All done! The converted files are all correctly timed. Press enter to close the program :3"+bcolors.ENDC)
+    print(bcolors.OKGREEN+"All done! The converted files are all correctly timed :3"+bcolors.ENDC)
 
 main()
