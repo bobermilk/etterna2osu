@@ -116,12 +116,11 @@ def main():
         print("Short LNs will not be removed")
         remove_ln=False
     print()
-    # creator=input("Enter the name you want as the creator of the converts >> ")
-    # if not creator:
-    #     print("Invalid creator, defaulting to bobermilk")
-    #     creator="bobermilk"
-    # print()
-    creator="bobermilk"
+    creator=input("Enter the name you want as the creator of the converts >> ")
+    if not creator:
+        print("Invalid creator, defaulting to bobermilk")
+        creator="bobermilk"
+    print()
     print(bcolors.HEADER+"All the converted maps can have a constant offset error of ±15 miliseconds (human error + different setups)"+bcolors.ENDC)
     user_offset=input("Integer offset in milliseconds to be applied to all converted maps (use negative offset if song is coming earlier) >> ")
     if not user_offset:
@@ -261,8 +260,7 @@ def main():
                                     edit.write("AudioFilename: "+audio_filename)
                                     edit.write("\n")
                                 elif f[j]=="Tags: ":
-                                    edit.write("Tags: etterna etterna2osu")
-                                    edit.write("\n")
+                                    f[j]="Tags: etterna etterna2osu etterna2osu_v1\n"
                                 elif "OverallDifficulty" in f[j]:
                                     edit.write(f"OverallDifficulty: {OD}")
                                     edit.write("\n")
