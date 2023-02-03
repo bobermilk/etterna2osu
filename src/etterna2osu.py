@@ -159,6 +159,8 @@ def main():
                 # converted files handle offset and sv and titles
                 osues=[f for f in os.listdir(".") if f.endswith(".osu")]
 
+                audio_filename=str(i)+".mp3"
+                background_filename="foobaruwu"
                 for osu in osues:
                     with open(f"..\\{osu}", "a", encoding="utf8") as edit:
                         skip=False
@@ -188,42 +190,39 @@ def main():
                                     # is there a entry
                                     if "." in audio:
                                         stop=False
-                                        audio=os.path.splitext(audio)
-                                        # rename the audio file 
-                                        oldext=audio[1].lower()
-                                        audio_filename=str(i)+".mp3"
-                                        try:
-                                            sample_rate=int(subprocess.run(["..\\..\\..\\sox\\sox.exe", "--i", "-r", audio[0]+audio[1]], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
-                                            average_bitrate=subprocess.run(["..\\..\\..\\sox\\sox.exe", "--i", "-B", audio[0]+audio[1]], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip() 
-                                            channel_count=int(subprocess.run(["..\\..\\..\\sox\\sox.exe", "--i", "-c", audio[0]+audio[1]], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
-                                            subprocess.run(["..\\..\\..\\sox\\sox.exe", "-v", "0.99", audio[0]+audio[1], "etterna_offset.raw"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                                            # maybe try another codec instead of lame
-                                            # -qscale:a is for VBR higher quality, we use -b:a CBR cuz time sensitive
-                                            a=subprocess.run(["..\\..\\..\\tools\\ffmpeg.exe", "-f", "s16le",  "-ar", str(sample_rate) ,"-ac", str(channel_count), "-i", "etterna_offset.raw","-codec:a" ,"libmp3lame" ,"-b:a" , average_bitrate, "etterna_offset.mp3"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                                            shutil.move("etterna_offset.mp3", f"..\\{audio_filename}")
-                                            os.remove("etterna_offset.raw")
-                                        except Exception as e:
-                                            stop=True
-                                            
-                                        # if oldext == ".mp3":
-                                        #     audio_filename=str(i)+".mp3"
-                                        #     subprocess.run([f"..\\..\\..\\tools\\test.exe", audio[0]+audio[1]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                                        #     subprocess.run([f"..\\..\\..\\tools\\lame.exe", "-r", "etterna_offset.raw"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                                        #     os.remove("etterna_offset.raw")
-                                            
-                                        #     # subprocess.call(f'ffmpeg -i "{audio[0]+oldext}" "{audio[0]+".wav"}"', shell=True)
-                                        # else:
-                                        #     audio_filename=str(i)+".wav"
+                                        if not os.path.isfile(f"..\\{audio_filename}"):
+                                            try:
+                                                sample_rate=int(subprocess.run(["..\\..\\..\\sox\\sox.exe", "--i", "-r", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
+                                                average_bitrate=subprocess.run(["..\\..\\..\\sox\\sox.exe", "--i", "-B", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip() 
+                                                channel_count=int(subprocess.run(["..\\..\\..\\sox\\sox.exe", "--i", "-c", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
+                                                subprocess.run(["..\\..\\..\\sox\\sox.exe", "-v", "0.99", audio, "etterna_offset.raw"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                # maybe try another codec instead of lame
+                                                # -qscale:a is for VBR higher quality, we use -b:a CBR cuz time sensitive
+                                                a=subprocess.run(["..\\..\\..\\tools\\ffmpeg.exe", "-f", "s16le",  "-ar", str(sample_rate) ,"-ac", str(channel_count), "-i", "etterna_offset.raw","-codec:a" ,"libmp3lame" ,"-b:a" , average_bitrate, "etterna_offset.mp3"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                shutil.move("etterna_offset.mp3", f"..\\{audio_filename}")
+                                                os.remove("etterna_offset.raw")
+                                            except Exception as e:
+                                                stop=True
+                                                
+                                            # if oldext == ".mp3":
+                                            #     audio_filename=str(i)+".mp3"
+                                            #     subprocess.run([f"..\\..\\..\\tools\\test.exe", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                            #     subprocess.run([f"..\\..\\..\\tools\\lame.exe", "-r", "etterna_offset.raw"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                            #     os.remove("etterna_offset.raw")
+                                                
+                                            #     # subprocess.call(f'ffmpeg -i "{audio[0]+oldext}" "{audio[0]+".wav"}"', shell=True)
+                                            # else:
+                                            #     audio_filename=str(i)+".wav"
 
-                                        # try:
-                                        #     if oldext==".mp3":
-                                        #         shutil.move("etterna_offset.mp3", f"..\\{audio_filename}")
-                                        #     else:
-                                        #         shutil.move(audio[0]+audio[1], f"..\\{audio_filename}")
-                                        # except:
-                                        #     # specified file does not exist. moving on.
-                                        #     stop=True
-                                        #     pass
+                                            # try:
+                                            #     if oldext==".mp3":
+                                            #         shutil.move("etterna_offset.mp3", f"..\\{audio_filename}")
+                                            #     else:
+                                            #         shutil.move(audio, f"..\\{audio_filename}")
+                                            # except:
+                                            #     # specified file does not exist. moving on.
+                                            #     stop=True
+                                            #     pass
 
                                     edit.write("AudioFilename: "+audio_filename)
                                     edit.write("\n")
@@ -234,13 +233,24 @@ def main():
                                     edit.write(f"HPDrainRate: {HP}")
                                     edit.write("\n")
                                 elif "[Events]" in f[j]:
-                                    edit.write(f[j])
-                                    image=f[j+2].split(",")[-1][1:-2]
-                                    try:
-                                        shutil.copy2(image, "..")
-                                    except:
-                                        # specified file does not exist. moving on.
+                                    image=f[j+2].split(",")
+                                    image_filename=image[-1][1:-2]
+                                    image_ext=os.path.splitext(image_filename)[1]
+                                    background_filename=str(i)+image_ext
+                                    if not os.path.isfile(f"..\\{background_filename}"):
+                                        try:
+                                            shutil.move(image_filename, f"..\\{background_filename}")
+                                        except:
+                                            # specified file does not exist. moving on.
                                             pass
+
+                                    image[-1]='"'+background_filename+'"\n'
+                                    bg=""
+                                    for a in image:
+                                        bg+=a
+                                        bg+=","
+                                    bg=bg[:-1]
+                                    edit.write(bg)
                                 elif "[TimingPoints]" in f[j]:
                                     skip=True
                                     edit.write(f[j])
