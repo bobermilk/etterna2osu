@@ -1,9 +1,9 @@
 import os
-import sys
 import zipfile
 import shutil
 import re
 import subprocess
+from sys import platform, exit
 
 APP_VERSION=1
 TARGET_DIR="etterna2osu_song_packs"
@@ -30,6 +30,10 @@ def cleanup():
     for folder in target_folders:
         shutil.rmtree(folder)
 
+def is_tool(name):
+    from shutil import which
+    return which(name) is not None
+
 def main():
     # check for updates
     import urllib.request, json 
@@ -53,6 +57,11 @@ def main():
         kernel32.GetConsoleMode(hStdOut, ctypes.byref(mode))
         mode.value |= 4
         kernel32.SetConsoleMode(hStdOut, mode)
+    
+    if platform != "win32":
+        # we need wine 
+        if not is_tool("wine"):
+            exit("Wine has to be installed to run this program")
 
     if not os.path.isdir(TARGET_DIR):
         os.mkdir(TARGET_DIR)
@@ -71,7 +80,7 @@ def main():
     #TODO: check for folder and non zips
     target_files = [f for f in os.listdir(TARGET_DIR) if os.path.isfile(os.path.join(TARGET_DIR, f)) and os.path.splitext(os.path.join(TARGET_DIR, f))[1]==".zip"]
     if len(target_files)==0:
-        sys.exit("No packs are in etterna_to_osu folder, exiting")
+        exit("No packs are in etterna_to_osu folder, exiting")
     print("Detected files:")
     for i, file in enumerate(target_files, 1):
         print(f"    {i}. "+file)
@@ -155,7 +164,10 @@ def main():
             if len(sm)>0:
                 sm=sm[0]
                 os.chdir(chart)
-                subprocess.run([f'..\\..\\..\\raindrop\\raindrop.exe', '-g', 'om', '-i', sm, '-o', '.'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                if platform == "win32":
+                    subprocess.run([f'..\\..\\..\\tools\\win32\\raindrop\\raindrop.exe', '-g', 'om', '-i', sm, '-o', '.'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                else:
+                    subprocess.run(["wine", f'..\\..\\..\\tools\\win32\\raindrop\\raindrop.exe', '-g', 'om', '-i', sm, '-o', '.'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 # converted files handle offset and sv and titles
                 osues=[f for f in os.listdir(".") if f.endswith(".osu")]
 
@@ -192,13 +204,32 @@ def main():
                                         stop=False
                                         if not os.path.isfile(f"..\\{audio_filename}"):
                                             try:
-                                                sample_rate=int(subprocess.run(["..\\..\\..\\sox\\sox.exe", "--i", "-r", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
-                                                average_bitrate=subprocess.run(["..\\..\\..\\sox\\sox.exe", "--i", "-B", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip() 
-                                                channel_count=int(subprocess.run(["..\\..\\..\\sox\\sox.exe", "--i", "-c", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
-                                                subprocess.run(["..\\..\\..\\sox\\sox.exe", "-v", "0.99", audio, "etterna_offset.raw"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                                                # maybe try another codec instead of lame
-                                                # -qscale:a is for VBR higher quality, we use -b:a CBR cuz time sensitive
-                                                a=subprocess.run(["..\\..\\..\\tools\\ffmpeg.exe", "-f", "s16le",  "-ar", str(sample_rate) ,"-ac", str(channel_count), "-i", "etterna_offset.raw","-codec:a" ,"libmp3lame" ,"-b:a" , average_bitrate, "etterna_offset.mp3"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                if platform == "win32":
+                                                    sample_rate=int(subprocess.run(["..\\..\\..\\tools\\win32\\sox\\sox.exe", "--i", "-r", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
+                                                    average_bitrate=subprocess.run(["..\\..\\..\\tools\\win32\\sox\\sox.exe", "--i", "-B", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip() 
+                                                    channel_count=int(subprocess.run(["..\\..\\..\\tools\\win32\\sox\\sox.exe", "--i", "-c", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
+                                                    subprocess.run(["..\\..\\..\\tools\\win32\\sox\\sox.exe", "-v", "0.99", audio, "etterna_offset.raw"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                    # maybe try another codec instead of lame
+                                                    # -qscale:a is for VBR higher quality, we use -b:a CBR cuz time sensitive
+                                                    subprocess.run(["..\\..\\..\\tools\\win32\\ffmpeg.exe", "-f", "s16le",  "-ar", str(sample_rate) ,"-ac", str(channel_count), "-i", "etterna_offset.raw","-codec:a" ,"libmp3lame" ,"-b:a" , average_bitrate, "etterna_offset.mp3"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                elif platform == "linux" or platform == "linux2":
+                                                    sample_rate=int(subprocess.run(["wine","..\\..\\..\\tools\\win32\\sox\\sox.exe", "--i", "-r", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
+                                                    average_bitrate=subprocess.run(["wine","..\\..\\..\\tools\\win32\\sox\\sox.exe", "--i", "-B", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip() 
+                                                    channel_count=int(subprocess.run(["wine","..\\..\\..\\tools\\win32\\sox\\sox.exe", "--i", "-c", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
+                                                    subprocess.run(["wine","..\\..\\..\\tools\\win32\\sox\\sox.exe", "-v", "0.99", audio, "etterna_offset.raw"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                    # maybe try another codec instead of lame
+                                                    # -qscale:a is for VBR higher quality, we use -b:a CBR cuz time sensitive
+                                                    subprocess.run(["..\\..\\..\\tools\\linux\\ffmpeg", "-f", "s16le",  "-ar", str(sample_rate) ,"-ac", str(channel_count), "-i", "etterna_offset.raw","-codec:a" ,"libmp3lame" ,"-b:a" , average_bitrate, "etterna_offset.mp3"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                elif platform == "darwin":
+                                                    sample_rate=int(subprocess.run(["..\\..\\..\\tools\\darwin\\sox\\sox", "--i", "-r", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
+                                                    average_bitrate=subprocess.run(["..\\..\\..\\tools\\darwin\\sox\\sox", "--i", "-B", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip() 
+                                                    channel_count=int(subprocess.run(["..\\..\\..\\tools\\darwin\\sox\\sox", "--i", "-c", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
+                                                    subprocess.run(["..\\..\\..\\tools\\darwin\\sox\\sox", "-v", "0.99", audio, "etterna_offset.raw"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                    # maybe try another codec instead of lame
+                                                    # -qscale:a is for VBR higher quality, we use -b:a CBR cuz time sensitive
+                                                    subprocess.run(["..\\..\\..\\darwin\\win32\\ffmpeg", "-f", "s16le",  "-ar", str(sample_rate) ,"-ac", str(channel_count), "-i", "etterna_offset.raw","-codec:a" ,"libmp3lame" ,"-b:a" , average_bitrate, "etterna_offset.mp3"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+
                                                 shutil.move("etterna_offset.mp3", f"..\\{audio_filename}")
                                                 os.remove("etterna_offset.raw")
                                                 os.remove(audio)
