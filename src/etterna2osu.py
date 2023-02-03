@@ -31,6 +31,20 @@ def cleanup():
         shutil.rmtree(folder)
 
 def main():
+    # check for updates
+    import urllib.request, json 
+    try:
+        with urllib.request.urlopen("https://api.github.com/repos/bobermilk/etterna2osu/releases") as url:
+            data = json.load(url)
+            if APP_VERSION < int(data[0]["name"][1:]):
+                print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-78)/2)+"!"*86+bcolors.ENDC)
+                print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-78)/2)+"!!! Update available at "+data[0]["html_url"]+" !!!")
+                print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-78)/2)+"!"*86+bcolors.ENDC)
+                print()
+    except:
+        pass
+
+    # fix win 10 colors
     if os.name == "nt":
         import ctypes
         kernel32 = ctypes.WinDLL('kernel32')
