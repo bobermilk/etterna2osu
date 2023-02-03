@@ -7,7 +7,6 @@ import subprocess
 
 APP_VERSION=1
 TARGET_DIR="etterna2osu_song_packs"
-TERMINAL_WIDTH=os.get_terminal_size().columns
 
 offset=-26
 failed=[]
@@ -23,6 +22,9 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+def TERMINAL_WIDTH():
+    return os.get_terminal_size().columns
+
 def cleanup():
     target_folders = [f for f in os.listdir(".") if not os.path.isfile(f)]
     for folder in target_folders:
@@ -30,7 +32,6 @@ def cleanup():
 
 def main():
     # TODO: check with guil
-    os.system('mode con: cols=100 lines=40')
     if os.name == "nt":
         import ctypes
         kernel32 = ctypes.WinDLL('kernel32')
@@ -43,9 +44,9 @@ def main():
     if not os.path.isdir(TARGET_DIR):
         os.mkdir(TARGET_DIR)
         
-    print(bcolors.HEADER+" "*int((TERMINAL_WIDTH-27)/2)+f"etterna2osu v{APP_VERSION} by bobermilk"+bcolors.ENDC)
-    print(bcolors.HEADER+" "*int((TERMINAL_WIDTH-39)/2)+"DM milk#6867 on discord for any queries"+bcolors.ENDC)
-    print(bcolors.OKBLUE+" "*int((TERMINAL_WIDTH-78)/2)+bcolors.UNDERLINE+"Thank you demi, guil, marc, chxu, senya, gonx, messica for helping me make this"+bcolors.ENDC)
+    print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-27)/2)+f"etterna2osu v{APP_VERSION} by bobermilk"+bcolors.ENDC)
+    print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-39)/2)+"DM milk#6867 on discord for any queries"+bcolors.ENDC)
+    print(bcolors.OKBLUE+" "*int((TERMINAL_WIDTH()-78)/2)+bcolors.UNDERLINE+"Thank you demi, guil, marc, chxu, senya, gonx, messica for helping me make this"+bcolors.ENDC)
     print()
     print("You can obtain etterna packs zips at https://etternaonline.com/packs")
     path = os.path.realpath(TARGET_DIR)
@@ -82,8 +83,8 @@ def main():
     # if not creator:
     #     print("Invalid creator, defaulting to bobermilk")
     #     creator="bobermilk"
+    # print()
     creator="bobermilk"
-    print()
     user_offset=input("Integer offset to be applied to all converted maps in milliseconds (positive offset means notes come later) >> ")
     if not user_offset:
         user_offset=0
@@ -115,7 +116,7 @@ def main():
             os.remove(f)
         charts=os.listdir(".")
         print()
-        print(bcolors.HEADER+bcolors.UNDERLINE+"Song (charter)"+bcolors.ENDC+" "*(TERMINAL_WIDTH-21)+bcolors.HEADER+bcolors.UNDERLINE+"Status"+bcolors.ENDC)
+        print(bcolors.HEADER+bcolors.UNDERLINE+"Song (charter)"+bcolors.ENDC+" "*(TERMINAL_WIDTH()-21)+bcolors.HEADER+bcolors.UNDERLINE+"Status"+bcolors.ENDC)
         for i, chart in enumerate(charts, 1):
             sm=[f for f in os.listdir(chart) if f.endswith(".sm")]
             # is there .sm?
@@ -213,7 +214,7 @@ def main():
                                     while j<len(f) and "," not in f[j]:
                                         j+=1
                                     timing=f[j].split(",")
-                                    timing[0]+=offset
+                                    timing[0]=str(int(timing[0])+offset)
                                     timing_point=""
                                     for pt in timing:
                                         timing_point+=pt
@@ -249,10 +250,10 @@ def main():
                                     edit.write(f[j])
                 if not stop:
                     msg="[ Good ✓ ]"
-                    print(chart+" "*(TERMINAL_WIDTH-len(chart)-len(msg)-1)+bcolors.OKGREEN+msg+bcolors.ENDC)
+                    print(chart+" "*(TERMINAL_WIDTH()-len(chart)-len(msg)-1)+bcolors.OKGREEN+msg+bcolors.ENDC)
                 else:
                     failed.append(chart)
-                    print(chart+"  "+bcolors.WARNING+"-"*(TERMINAL_WIDTH-len(chart)-16)+">  "+bcolors.FAIL+"[ Fail ✗ ]"+bcolors.ENDC)
+                    print(chart+"  "+bcolors.WARNING+"-"*(TERMINAL_WIDTH()-len(chart)-16)+">  "+bcolors.FAIL+"[ Fail ✗ ]"+bcolors.ENDC)
                 os.chdir("..")
         # wrap things up and move them to output
         output=[f for f in os.listdir(".") if os.path.isfile(f)]
