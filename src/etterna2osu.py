@@ -80,6 +80,18 @@ def main():
         print("Invalid HP, defaulting to HP 7")
         HP=7
     print()
+    try:
+        remove_ln=str(input("Do you want to remove short LNs? (hold duration <= 1/8) [y/n] >> ")).strip()
+        if remove_ln=="y" or remove_ln=="Y":
+            print("Short LNs will be removed")
+            remove_ln=True
+        else:
+            print("Short LNs will not be removed")
+            remove_ln=False
+    except:
+        print("Short LNs will not be removed")
+        remove_ln=False
+    print()
     # creator=input("Enter the name you want as the creator of the converts >> ")
     # if not creator:
     #     print("Invalid creator, defaulting to bobermilk")
@@ -87,14 +99,18 @@ def main():
     # print()
     creator="bobermilk"
     print(bcolors.HEADER+"All the converted maps can have a constant offset error of ±15 miliseconds (human error + different setups)"+bcolors.ENDC)
-    user_offset=input("Integer offset to be applied to all converted maps in milliseconds (use negative offset if song is coming earlier) >> ")
+    user_offset=input("Integer offset in milliseconds to be applied to all converted maps (use negative offset if song is coming earlier) >> ")
     if not user_offset:
         user_offset=0
     else:
-        if user_offset.lstrip("-").isdigit():
-            global offset
+        user_offset=user_offset.lstrip("-")
+        if user_offset.isdigit():
             user_offset=int(user_offset)
-            offset+=user_offset
+            if user_offset in range(-1000,1001):
+                global offset
+                offset+=user_offset
+            else:
+                print("User offset too large, (max 1000 milliseconds)")
         else:
             user_offset=0
 
@@ -134,6 +150,7 @@ def main():
                         skip=False
                         with open(osu, encoding="utf8") as beatmap:
                             f=beatmap.readlines()
+                            beat_duration=0
                             for j in range(0, len(f)):
                                 if "Creator:" in f[j]:
                                     edit.write("Creator: "+ creator)
@@ -216,6 +233,7 @@ def main():
                                     while j<len(f) and "," not in f[j]:
                                         j+=1
                                     timing=f[j].split(",")
+                                    beat_duration=float(timing[1])
                                     timing[0]=str(round(float(timing[0]))+offset)
                                     timing_point=""
                                     for pt in timing:
@@ -235,10 +253,17 @@ def main():
                                         # 1,1,1,1,1,hitsample
                                         # 1,1,1,1,1,1:hitsample
                                         object_data=f[j].split(",")
-                                        object_data[2]=str(int(object_data[2])+offset)
+                                        note_time=int(object_data[2])+offset
+                                        object_data[2]=str(note_time)
                                         if len(object_data)==7:
                                             # ln detected 
-                                            object_data[-2]=str(int(object_data[-2])+offset)
+                                            ln_release=int(object_data[-2])+offset
+                                            if remove_ln and ln_release-note_time<=beat_duration/8:
+                                                object_data[3]=str(1)
+                                                # remove the 1/8 ln
+                                                del object_data[-2]
+                                            else:
+                                                object_data[-2]=str(ln_release)
                                         note=""
                                         for x in object_data:
                                             note+=x
