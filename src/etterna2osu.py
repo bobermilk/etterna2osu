@@ -237,6 +237,7 @@ def main():
                                     edit.write(f"HPDrainRate: {HP}")
                                     edit.write("\n")
                                 elif "[Events]" in f[j]:
+                                    edit.write(f[j])
                                     image=f[j+2].split(",")
                                     image_filename=image[-1][1:-2]
                                     image_ext=os.path.splitext(image_filename)[1]
@@ -254,7 +255,7 @@ def main():
                                         bg+=a
                                         bg+=","
                                     bg=bg[:-1]
-                                    edit.write(bg)
+                                    f[j+2]=bg
                                 elif "[TimingPoints]" in f[j]:
                                     skip=True
                                     edit.write(f[j])
