@@ -31,7 +31,6 @@ def cleanup():
         shutil.rmtree(folder)
 
 def main():
-    # TODO: check with guil
     if os.name == "nt":
         import ctypes
         kernel32 = ctypes.WinDLL('kernel32')
@@ -45,13 +44,15 @@ def main():
         os.mkdir(TARGET_DIR)
         
     print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-27)/2)+f"etterna2osu v{APP_VERSION} by bobermilk"+bcolors.ENDC)
-    print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-39)/2)+"DM milk#6867 on discord for any queries"+bcolors.ENDC)
-    print(bcolors.OKBLUE+" "*int((TERMINAL_WIDTH()-78)/2)+bcolors.UNDERLINE+"Thank you demi, guil, marc, chxu, senya, gonx, messica for helping me make this"+bcolors.ENDC)
+    print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-81)/2)+"DM milk#6867 on discord for any queries after reading FAQs at https://milkies.ml/"+bcolors.ENDC)
+    print(bcolors.OKBLUE+" "*int((TERMINAL_WIDTH()-78)/2)+"Thank you demi, guil, marc, chxu, senya, gonx, messica for helping me make this"+bcolors.ENDC)
     print()
-    print("You can obtain etterna packs zips at https://etternaonline.com/packs")
+    print(bcolors.FAIL+" "*int((TERMINAL_WIDTH()-96)/2)+"bobermilk is not liable for any distribution of the converted packs, only upload your own charts"+bcolors.ENDC)
+    print()
+    print(bcolors.HEADER+"You can obtain etterna packs zips at https://etternaonline.com/packs"+bcolors.ENDC)
     path = os.path.realpath(TARGET_DIR)
     os.startfile(path)
-    input("Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR))
+    input(bcolors.WARNING+"Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR)+bcolors.ENDC)
     print()
     #TODO: check for folder and non zips
     target_files = [f for f in os.listdir(TARGET_DIR) if os.path.isfile(os.path.join(TARGET_DIR, f)) and os.path.splitext(os.path.join(TARGET_DIR, f))[1]==".zip"]
@@ -85,7 +86,8 @@ def main():
     #     creator="bobermilk"
     # print()
     creator="bobermilk"
-    user_offset=input("Integer offset to be applied to all converted maps in milliseconds (positive offset means notes come later) >> ")
+    print(bcolors.HEADER+"All the converted maps can have a constant offset error of ±15 miliseconds (human error + different setups)"+bcolors.ENDC)
+    user_offset=input("Integer offset to be applied to all converted maps in milliseconds (use negative offset if song is coming earlier) >> ")
     if not user_offset:
         user_offset=0
     else:
@@ -116,7 +118,7 @@ def main():
             os.remove(f)
         charts=os.listdir(".")
         print()
-        print(bcolors.HEADER+bcolors.UNDERLINE+"Song (charter)"+bcolors.ENDC+" "*(TERMINAL_WIDTH()-21)+bcolors.HEADER+bcolors.UNDERLINE+"Status"+bcolors.ENDC)
+        print(bcolors.HEADER+bcolors.UNDERLINE+"Song (charter)"+bcolors.ENDC+" "*(TERMINAL_WIDTH()-21)+bcolors.HEADER+bcolors.UNDERLINE+"Status"+bcolors.ENDC+" ")
         for i, chart in enumerate(charts, 1):
             sm=[f for f in os.listdir(chart) if f.endswith(".sm")]
             # is there .sm?
@@ -214,7 +216,7 @@ def main():
                                     while j<len(f) and "," not in f[j]:
                                         j+=1
                                     timing=f[j].split(",")
-                                    timing[0]=str(int(timing[0])+offset)
+                                    timing[0]=str(round(float(timing[0]))+offset)
                                     timing_point=""
                                     for pt in timing:
                                         timing_point+=pt
