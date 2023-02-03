@@ -201,6 +201,7 @@ def main():
                                                 a=subprocess.run(["..\\..\\..\\tools\\ffmpeg.exe", "-f", "s16le",  "-ar", str(sample_rate) ,"-ac", str(channel_count), "-i", "etterna_offset.raw","-codec:a" ,"libmp3lame" ,"-b:a" , average_bitrate, "etterna_offset.mp3"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                                                 shutil.move("etterna_offset.mp3", f"..\\{audio_filename}")
                                                 os.remove("etterna_offset.raw")
+                                                os.remove(audio)
                                             except Exception as e:
                                                 stop=True
                                                 
