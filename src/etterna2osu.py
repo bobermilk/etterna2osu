@@ -30,10 +30,6 @@ def cleanup():
     for folder in target_folders:
         shutil.rmtree(folder)
 
-def is_tool(name):
-    from shutil import which
-    return which(name) is not None
-
 def main():
     # check for updates
     import urllib.request, json 
@@ -60,8 +56,10 @@ def main():
     
     if platform != "win32":
         # we need wine 
-        if not is_tool("wine"):
-            exit("Wine has to be installed to run this program")
+        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-73)/2)+"!"*86+bcolors.ENDC)
+        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-73)/2)+"!!! You need 32-bit wine installed to run this program on your system !!!")
+        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-73)/2)+"!"*86+bcolors.ENDC)
+        print("You need 32-bit wine installed to run this program on your system")
 
     if not os.path.isdir(TARGET_DIR):
         os.mkdir(TARGET_DIR)
@@ -74,7 +72,10 @@ def main():
     print()
     print(bcolors.HEADER+"You can obtain etterna packs zips at https://etternaonline.com/packs"+bcolors.ENDC)
     path = os.path.realpath(TARGET_DIR)
-    os.startfile(path)
+    try:
+        os.startfile(path)
+    except:
+        pass
     input(bcolors.WARNING+"Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR)+bcolors.ENDC)
     print()
     #TODO: check for folder and non zips
