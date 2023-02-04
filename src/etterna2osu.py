@@ -112,15 +112,15 @@ def main():
         HP=7
     print()
     try:
-        remove_ln=str(input("Do you want to remove short LNs? (hold duration <= 1/8) [y/n] >> ")).strip()
+        remove_ln=str(input("Change short LNs to normal note? (hold duration <= 1/8) [y/n] >> ")).strip()
         if remove_ln=="y" or remove_ln=="Y":
-            print("Short LNs will be removed")
+            print("Short LNs will be changed to normal note")
             remove_ln=True
         else:
-            print("Short LNs will not be removed")
+            print("Short LNs will remain")
             remove_ln=False
     except:
-        print("Short LNs will not be removed")
+        print("Short LNs will remain")
         remove_ln=False
     print()
     creator=input("Enter the name you want as the creator of the converts >> ")
@@ -267,7 +267,11 @@ def main():
                                     edit.write("AudioFilename: "+audio_filename)
                                     edit.write("\n")
                                 elif "Tags:" in f[j]:
-                                    f[j]=f"Tags: etterna etterna2osu etterna2osu_v{APP_VERSION}\n"
+                                    tags=f"Tags: etterna etterna2osu etterna2osu_v{APP_VERSION}"
+                                    if remove_ln:
+                                        tags+=" no_shlongs"
+                                    tags+="\n"
+                                    f[j]=tags
                                     edit.write(f[j])
                                 elif "OverallDifficulty" in f[j]:
                                     edit.write(f"OverallDifficulty: {OD}")
