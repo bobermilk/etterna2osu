@@ -1,10 +1,11 @@
 # etterna2osu
-This tool converts etterna charts to osu maps. There is no offset issue :3
+This tool converts etterna charts to osu maps
 
-Only windows is supported for now. linux/macos i'll write soon
+Only windows is supported for now. linux/macos support coming soon
 
 # How to run?
 Download the exe from the ![release page](https://github.com/bobermilk/etterna2osu/releases) 
+unzip and open etterna2osu.exe
 
 Don't trust prebuilt?:
 python src/etterna2osu.py 

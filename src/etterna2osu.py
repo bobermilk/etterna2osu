@@ -81,9 +81,14 @@ def main():
     input(bcolors.WARNING+"Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR)+bcolors.ENDC)
     print()
     #TODO: check for folder and non zips
-    target_files = [f for f in os.listdir(TARGET_DIR) if os.path.isfile(os.path.join(TARGET_DIR, f)) and os.path.splitext(os.path.join(TARGET_DIR, f))[1]==".zip"]
-    if len(target_files)==0:
-        exit("No packs are in etterna_to_osu folder, exiting")
+    folder_content = lambda: [f for f in os.listdir(TARGET_DIR) if os.path.isfile(os.path.join(TARGET_DIR, f)) and os.path.splitext(os.path.join(TARGET_DIR, f))[1]==".zip"]
+    while len(folder_content())==0:
+        print(bcolors.FAIL+"No packs are in etterna_to_osu folder"+bcolors.ENDC)
+        input(bcolors.WARNING+"Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR)+bcolors.ENDC)
+        print()
+
+    target_files=folder_content()
+
     print("Detected files:")
     for i, file in enumerate(target_files, 1):
         print(f"    {i}. "+file)
