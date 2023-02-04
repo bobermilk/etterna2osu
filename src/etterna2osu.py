@@ -3,6 +3,7 @@ import zipfile
 import shutil
 import re
 import subprocess
+import urllib.request, json 
 from sys import platform, exit
 
 APP_VERSION=1
@@ -31,8 +32,26 @@ def cleanup():
         shutil.rmtree(folder)
 
 def main():
+    # fix win 10 colors
+    if os.name == "nt":
+        import ctypes
+        kernel32 = ctypes.WinDLL('kernel32')
+        hStdOut = kernel32.GetStdHandle(-11)
+        mode = ctypes.c_ulong()
+        kernel32.GetConsoleMode(hStdOut, ctypes.byref(mode))
+        mode.value |= 4
+        kernel32.SetConsoleMode(hStdOut, mode)
+    else:
+        exit("Only windows is supported for now")
+    
+    if platform != "win32":
+        # we need wine 
+        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-73)/2)+"!"*86+bcolors.ENDC)
+        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-73)/2)+"!!! You need 32-bit wine installed to run this program on your system !!!")
+        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-73)/2)+"!"*86+bcolors.ENDC)
+        print("You need 32-bit wine installed to run this program on your system")
+
     # check for updates
-    import urllib.request, json 
     try:
         with urllib.request.urlopen("https://api.github.com/repos/bobermilk/etterna2osu/releases") as url:
             data = json.load(url)
@@ -43,23 +62,6 @@ def main():
                 print()
     except:
         pass
-
-    # fix win 10 colors
-    if os.name == "nt":
-        import ctypes
-        kernel32 = ctypes.WinDLL('kernel32')
-        hStdOut = kernel32.GetStdHandle(-11)
-        mode = ctypes.c_ulong()
-        kernel32.GetConsoleMode(hStdOut, ctypes.byref(mode))
-        mode.value |= 4
-        kernel32.SetConsoleMode(hStdOut, mode)
-    
-    if platform != "win32":
-        # we need wine 
-        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-73)/2)+"!"*86+bcolors.ENDC)
-        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-73)/2)+"!!! You need 32-bit wine installed to run this program on your system !!!")
-        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-73)/2)+"!"*86+bcolors.ENDC)
-        print("You need 32-bit wine installed to run this program on your system")
 
     if not os.path.isdir(TARGET_DIR):
         os.mkdir(TARGET_DIR)
