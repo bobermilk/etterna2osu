@@ -4,6 +4,7 @@ import shutil
 import re
 import subprocess
 import urllib.request, json 
+from math import floor, ceil
 from sys import platform, exit
 
 APP_VERSION=1
@@ -306,7 +307,12 @@ def main():
                                         j+=1
                                     timing=f[j].split(",")
                                     beat_duration=float(timing[1])
-                                    timing[0]=str(round(float(timing[0]))+offset)
+                                    snap_offset=float(timing[0])
+                                    if snap_offset-floor(snap_offset)<0.5:
+                                        snap_offset=floor(snap_offset)
+                                    else:
+                                        snap_offset=ceil(snap_offset)
+                                    timing[0]=str(snap_offset+offset)
                                     timing_point=""
                                     for pt in timing:
                                         timing_point+=pt
