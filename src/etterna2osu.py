@@ -182,37 +182,37 @@ def main():
 
                 audio_filename=str(i)+".mp3"
                 background_filename="foobaruwu"
-                for osu in osues:
-                    with open(f"..\\{osu}", "a", encoding="utf8") as edit:
-                        skip=False
-                        with open(osu, encoding="utf8") as beatmap:
-                            f=beatmap.readlines()
-                            beat_duration=0
-                            for j in range(0, len(f)):
-                                if "Creator:" in f[j]:
-                                    edit.write("Creator: "+ creator)
-                                    edit.write("\n")
-                                elif "Title:" in f[j]:
-                                    title=re.split("[:]", f[j])
-                                    del title[0]
-                                    title=''.join(title).strip()
-                                    edit.write("Title: "+packfolder+" - "+title)
-                                    edit.write("\n")
-                                elif "TitleUnicode:" in f[j]:
-                                    title=re.split("[:]", f[j])
-                                    del title[0]
-                                    title=''.join(title).strip()
-                                    edit.write("TitleUnicode: "+packfolder+" - "+title)
-                                    edit.write("\n")
-                                elif "AudioFilename:" in f[j]:
-                                    audio=re.split("[:]", f[j])[-1].strip()
-                                    if audio[0]==" ":
-                                        audio=audio[1:]
-                                    # is there a entry
-                                    if "." in audio:
-                                        stop=False
-                                        if not os.path.isfile(f"..\\{audio_filename}"):
-                                            try:
+                try:
+                    for osu in osues:
+                        with open(f"..\\{osu}", "a", encoding="utf8") as edit:
+                            skip=False
+                            with open(osu, encoding="utf8") as beatmap:
+                                f=beatmap.readlines()
+                                beat_duration=0
+                                for j in range(0, len(f)):
+                                    if "Creator:" in f[j]:
+                                        edit.write("Creator: "+ creator)
+                                        edit.write("\n")
+                                    elif "Title:" in f[j]:
+                                        title=re.split("[:]", f[j])
+                                        del title[0]
+                                        title=''.join(title).strip()
+                                        edit.write("Title: "+packfolder+" - "+title)
+                                        edit.write("\n")
+                                    elif "TitleUnicode:" in f[j]:
+                                        title=re.split("[:]", f[j])
+                                        del title[0]
+                                        title=''.join(title).strip()
+                                        edit.write("TitleUnicode: "+packfolder+" - "+title)
+                                        edit.write("\n")
+                                    elif "AudioFilename:" in f[j]:
+                                        audio=re.split("[:]", f[j])[-1].strip()
+                                        if audio[0]==" ":
+                                            audio=audio[1:]
+                                        # is there a entry
+                                        if "." in audio:
+                                            stop=False
+                                            if not os.path.isfile(f"..\\{audio_filename}"):
                                                 if platform == "win32":
                                                     sample_rate=int(subprocess.run(["..\\..\\..\\tools\\win32\\sox\\sox.exe", "--i", "-r", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
                                                     average_bitrate=subprocess.run(["..\\..\\..\\tools\\win32\\sox\\sox.exe", "--i", "-B", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip() 
@@ -242,117 +242,117 @@ def main():
                                                 shutil.move("etterna_offset.mp3", f"..\\{audio_filename}")
                                                 os.remove("etterna_offset.raw")
                                                 os.remove(audio)
-                                            except Exception as e:
-                                                stop=True
-                                                
-                                            # if oldext == ".mp3":
-                                            #     audio_filename=str(i)+".mp3"
-                                            #     subprocess.run([f"..\\..\\..\\tools\\test.exe", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                                            #     subprocess.run([f"..\\..\\..\\tools\\lame.exe", "-r", "etterna_offset.raw"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                                            #     os.remove("etterna_offset.raw")
-                                                
-                                            #     # subprocess.call(f'ffmpeg -i "{audio[0]+oldext}" "{audio[0]+".wav"}"', shell=True)
-                                            # else:
-                                            #     audio_filename=str(i)+".wav"
+                                                    
+                                                # if oldext == ".mp3":
+                                                #     audio_filename=str(i)+".mp3"
+                                                #     subprocess.run([f"..\\..\\..\\tools\\test.exe", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                #     subprocess.run([f"..\\..\\..\\tools\\lame.exe", "-r", "etterna_offset.raw"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                #     os.remove("etterna_offset.raw")
+                                                    
+                                                #     # subprocess.call(f'ffmpeg -i "{audio[0]+oldext}" "{audio[0]+".wav"}"', shell=True)
+                                                # else:
+                                                #     audio_filename=str(i)+".wav"
 
-                                            # try:
-                                            #     if oldext==".mp3":
-                                            #         shutil.move("etterna_offset.mp3", f"..\\{audio_filename}")
-                                            #     else:
-                                            #         shutil.move(audio, f"..\\{audio_filename}")
-                                            # except:
-                                            #     # specified file does not exist. moving on.
-                                            #     stop=True
-                                            #     pass
+                                                # try:
+                                                #     if oldext==".mp3":
+                                                #         shutil.move("etterna_offset.mp3", f"..\\{audio_filename}")
+                                                #     else:
+                                                #         shutil.move(audio, f"..\\{audio_filename}")
+                                                # except:
+                                                #     # specified file does not exist. moving on.
+                                                #     stop=True
+                                                #     pass
 
-                                    edit.write("AudioFilename: "+audio_filename)
-                                    edit.write("\n")
-                                elif "Tags:" in f[j]:
-                                    tags=f"Tags: etterna etterna2osu etterna2osu_v{APP_VERSION}"
-                                    if remove_ln:
-                                        tags+=" no_shlongs"
-                                    tags+="\n"
-                                    f[j]=tags
-                                    edit.write(f[j])
-                                elif "OverallDifficulty" in f[j]:
-                                    edit.write(f"OverallDifficulty: {OD}")
-                                    edit.write("\n")
-                                elif "HPDrainRate" in f[j]:
-                                    edit.write(f"HPDrainRate: {HP}")
-                                    edit.write("\n")
-                                elif "[Events]" in f[j]:
-                                    edit.write(f[j])
-                                    image=f[j+2].split(",")
-                                    image_filename=image[-1][1:-2]
-                                    image_ext=os.path.splitext(image_filename)[1]
-                                    background_filename=str(i)+image_ext
-                                    if not os.path.isfile(f"..\\{background_filename}"):
-                                        try:
-                                            shutil.move(image_filename, f"..\\{background_filename}")
-                                        except:
-                                            # specified file does not exist. moving on.
-                                            pass
-
-                                    image[-1]='"'+background_filename+'"\n'
-                                    bg=""
-                                    for a in image:
-                                        bg+=a
-                                        bg+=","
-                                    bg=bg[:-1]
-                                    f[j+2]=bg
-                                elif "[TimingPoints]" in f[j]:
-                                    skip=True
-                                    edit.write(f[j])
-                                    while j<len(f) and "," not in f[j]:
-                                        j+=1
-                                    timing=f[j].split(",")
-                                    beat_duration=float(timing[1])
-                                    snap_offset=float(timing[0])
-                                    if snap_offset-floor(snap_offset)<0.5:
-                                        snap_offset=floor(snap_offset)
-                                    else:
-                                        snap_offset=ceil(snap_offset)
-                                    timing[0]=str(snap_offset+offset)
-                                    timing_point=""
-                                    for pt in timing:
-                                        timing_point+=pt
-                                        timing_point+=","
-                                    timing_point=timing_point[:-1]
-                                    edit.write(timing_point) #write the first timing point
-                                    edit.write("\n")
-                                    while j<len(f) and "," in f[j]:
-                                        j+=1
-                                elif "[HitObjects]" in f[j]:
-                                    skip=False
-                                    edit.write(f[j])
-                                    while j<len(f) and "," not in f[j]:
-                                        j+=1
-                                    while j<len(f) and "," in f[j]:
-                                        # 1,1,1,1,1,hitsample
-                                        # 1,1,1,1,1,1:hitsample
-                                        object_data=f[j].split(",")
-                                        note_time=int(object_data[2])+offset
-                                        object_data[2]=str(note_time)
-                                        if len(object_data)==7:
-                                            # ln detected 
-                                            ln_release=int(object_data[-2])+offset
-                                            if remove_ln and ln_release-note_time<=beat_duration/8:
-                                                object_data[3]=str(1)
-                                                # remove the 1/8 ln
-                                                del object_data[-2]
-                                            else:
-                                                object_data[-2]=str(ln_release)
-                                        note=""
-                                        for x in object_data:
-                                            note+=x
-                                            note+=","
-                                        note=note[:-1]
-                                        edit.write(note)
+                                        edit.write("AudioFilename: "+audio_filename)
                                         edit.write("\n")
-                                        j+=1
-                                    skip=True
-                                elif not skip:
-                                    edit.write(f[j])
+                                    elif "Tags:" in f[j]:
+                                        tags=f"Tags: etterna etterna2osu etterna2osu_v{APP_VERSION}"
+                                        if remove_ln:
+                                            tags+=" no_shlongs"
+                                        tags+="\n"
+                                        f[j]=tags
+                                        edit.write(f[j])
+                                    elif "OverallDifficulty" in f[j]:
+                                        edit.write(f"OverallDifficulty: {OD}")
+                                        edit.write("\n")
+                                    elif "HPDrainRate" in f[j]:
+                                        edit.write(f"HPDrainRate: {HP}")
+                                        edit.write("\n")
+                                    elif "[Events]" in f[j]:
+                                        edit.write(f[j])
+                                        image=f[j+2].split(",")
+                                        image_filename=image[-1][1:-2]
+                                        image_ext=os.path.splitext(image_filename)[1]
+                                        background_filename=str(i)+image_ext
+                                        if not os.path.isfile(f"..\\{background_filename}"):
+                                            try:
+                                                shutil.move(image_filename, f"..\\{background_filename}")
+                                            except:
+                                                # specified file does not exist. moving on.
+                                                pass
+
+                                        image[-1]='"'+background_filename+'"\n'
+                                        bg=""
+                                        for a in image:
+                                            bg+=a
+                                            bg+=","
+                                        bg=bg[:-1]
+                                        f[j+2]=bg
+                                    elif "[TimingPoints]" in f[j]:
+                                        skip=True
+                                        edit.write(f[j])
+                                        while j<len(f) and "," not in f[j]:
+                                            j+=1
+                                        timing=f[j].split(",")
+                                        beat_duration=float(timing[1])
+                                        snap_offset=float(timing[0])
+                                        if snap_offset-floor(snap_offset)<0.5:
+                                            snap_offset=floor(snap_offset)
+                                        else:
+                                            snap_offset=ceil(snap_offset)
+                                        timing[0]=str(snap_offset+offset)
+                                        timing_point=""
+                                        for pt in timing:
+                                            timing_point+=pt
+                                            timing_point+=","
+                                        timing_point=timing_point[:-1]
+                                        edit.write(timing_point) #write the first timing point
+                                        edit.write("\n")
+                                        while j<len(f) and "," in f[j]:
+                                            j+=1
+                                    elif "[HitObjects]" in f[j]:
+                                        skip=False
+                                        edit.write(f[j])
+                                        while j<len(f) and "," not in f[j]:
+                                            j+=1
+                                        while j<len(f) and "," in f[j]:
+                                            # 1,1,1,1,1,hitsample
+                                            # 1,1,1,1,1,1:hitsample
+                                            object_data=f[j].split(",")
+                                            note_time=int(object_data[2])+offset
+                                            object_data[2]=str(note_time)
+                                            if len(object_data)==7:
+                                                # ln detected 
+                                                ln_release=int(object_data[-2])+offset
+                                                if remove_ln and ln_release-note_time<=beat_duration/8:
+                                                    object_data[3]=str(1)
+                                                    # remove the 1/8 ln
+                                                    del object_data[-2]
+                                                else:
+                                                    object_data[-2]=str(ln_release)
+                                            note=""
+                                            for x in object_data:
+                                                note+=x
+                                                note+=","
+                                            note=note[:-1]
+                                            edit.write(note)
+                                            edit.write("\n")
+                                            j+=1
+                                        skip=True
+                                    elif not skip:
+                                        edit.write(f[j])
+                except:
+                    stop=True
                 if not stop:
                     msg="[ Good ✓ ]"
                     print(chart+" "*(TERMINAL_WIDTH()-len(chart)-len(msg)-1)+bcolors.OKGREEN+msg+bcolors.ENDC)
