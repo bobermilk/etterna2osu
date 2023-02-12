@@ -2,8 +2,10 @@
 # etterna2osu
 etterna2osu bulk converts etterna packs to osu maps without offset problems
 
-# Features
+# Demo
+[![asciicast](https://asciinema.org/a/559338.svg)](https://asciinema.org/a/559338)
 
+# Features
 - Bulk conversion
 - Accurate conversion timings
 - Notes are aligned to snaps in editor
@@ -12,7 +14,6 @@ etterna2osu bulk converts etterna packs to osu maps without offset problems
 - Change mapper name
 - Apply constant offset to all generated osu maps
 - Change shlongs to normal notes (short LNs with hold duration not exceeding 1/8 snap)
-
 
 # How to run?
 Download etterna2osu.zip from [releases](https://github.com/bobermilk/etterna2osu/releases), then unzip and open etterna2osu.exe
