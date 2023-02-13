@@ -189,6 +189,8 @@ def main():
                             skip=False
                             with open(osu, encoding="utf8") as beatmap:
                                 f=beatmap.readlines()
+                                if len(f)==3:
+                                    skip=True
                                 beat_duration=0
                                 for j in range(0, len(f)):
                                     if "Creator:" in f[j]:
