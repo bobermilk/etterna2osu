@@ -4,6 +4,7 @@ import shutil
 import re
 import subprocess
 import urllib.request, json 
+from PIL import Image
 from math import floor, ceil
 from sys import platform, exit
 
@@ -284,11 +285,26 @@ def main():
                                         image_filename=image[-1][1:-2]
                                         image_ext=os.path.splitext(image_filename)[1]
                                         background_filename=str(i)+image_ext
+
                                         if not os.path.isfile(f"..\\{background_filename}"):
+                                            if not os.path.isfile(image_filename):
+                                                # specified file does not exist. attempting to get the largest res image from the directory
+                                                max_area=0
+                                                try:
+                                                    for ff in os.listdir():
+                                                        if ff.lower().endswith(('.png', '.jpg', '.jpeg')):
+                                                            with Image.open(ff) as im:
+                                                                width, height=im.size
+                                                                if width*height>max_area:
+                                                                    max_area=width*height
+                                                                    image_filename=ff
+                                                                    image_ext=os.path.splitext(image_filename)[1]
+                                                                    background_filename=str(i)+image_ext
+                                                except:
+                                                    pass
                                             try:
                                                 shutil.move(image_filename, f"..\\{background_filename}")
                                             except:
-                                                # specified file does not exist. moving on.
                                                 pass
 
                                         image[-1]='"'+background_filename+'"\n'
