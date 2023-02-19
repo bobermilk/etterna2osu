@@ -114,6 +114,28 @@ def main():
         HP=7
     print()
     try:
+        msd_filter=float(input("Specify the minimum overall MSD of all converted charts, this will determine uprate (example msd: 23.43) >> "))
+    except:
+        print("Invalid MSD value, no uprates will be carried out")
+        msd_filter=-1
+    if msd_filter>100:
+        print("Invalid MSD value, defaulting to HP 7")
+        msd_filter=-1
+        HP=7
+    print()
+    try:
+        show_skillset_msd=str(input("Show skillset MSD in the diff names? [y/n]")).strip()
+        if show_skillset_msd=="y" or show_skillset_msd=="Y":
+            print("Skillset MSD values will be in the diff names")
+            show_skillset_msd=True
+        else:
+            print("Only overall MSD will be shown in the diff names")
+            show_skillset_msd=False
+    except:
+        print("Only overall MSD will be shown in the diff names")
+        show_skillset_msd=False
+    print()
+    try:
         remove_ln=str(input("Change short LNs to normal note? (hold duration <= 1/8) [y/n] >> ")).strip()
         if remove_ln=="y" or remove_ln=="Y":
             print("Short LNs will be changed to normal note")
@@ -183,7 +205,7 @@ def main():
                     line=line.decode()
                     if "|" in line:
                         line=line.split("|")
-                        msd[line[0].strip()+" "+str(rate) +"x - "]=list(map(float,line[1:]))
+                        msd[line[0].strip()+" "+str(rate) +"x - "]=[round(x, 1) for x in list(map(float,line[1:]))]
 
                 if platform == "win32":
                     subprocess.run([f'..\\..\\..\\tools\\win32\\raindrop\\raindrop.exe', '-g', 'om', '-i', sm, '-o', '.'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -220,9 +242,13 @@ def main():
                                         edit.write("TitleUnicode: "+packfolder+" - "+title)
                                         edit.write("\n")
                                     elif "Version:" in f[j]:
-                                        diff_name=re.split("[: (]", f[j])[2]+" 1.0x - "
+                                        diff_name=re.split("[: (]", f[j])[2]
                                         if diff_name in msd:
-                                            edit.write("Version: "+diff_name+str(round(msd[diff_name][0], 2)) + " MSD")
+                                            skillset_msd=msd[diff_name][1]
+                                            skillset_msd_text=""
+                                            if show_skillset_msd:
+                                                skillset_msd_text=f" (Stream:{skillset_msd[1]} | JS:{skillset_msd[2]} | HS:{skillset_msd[3]} | Stam:{skillset_msd[4]} | JkSpd:{skillset_msd[5]} | Tech:{skillset_msd[6]})"
+                                            edit.write("Version: "+diff_name+ + " MSD" + skillset_msd_text)
                                             edit.write("\n")
                                         else:
                                             edit.write(f[j])
