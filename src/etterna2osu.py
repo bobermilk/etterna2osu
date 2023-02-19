@@ -70,7 +70,7 @@ def main():
         
     print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-27)/2)+f"etterna2osu v{APP_VERSION} by bobermilk"+bcolors.ENDC)
     print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-92)/2)+"DM milk#6867 on discord for any queries after reading FAQs at https://milkies.ml/etterna2osu"+bcolors.ENDC)
-    print(bcolors.OKBLUE+" "*int((TERMINAL_WIDTH()-78)/2)+"Thank you demi, guil, marc, chxu, senya, gonx, messica for helping me make this"+bcolors.ENDC)
+    print(bcolors.OKBLUE+" "*int((TERMINAL_WIDTH()-88)/2)+"Thank you demi, kangalio, guil, marc, chxu, senya, gonx, messica for helping me make this"+bcolors.ENDC)
     print()
     print(bcolors.FAIL+" "*int((TERMINAL_WIDTH()-96)/2)+"bobermilk is not liable for any distribution of the converted packs, only upload your own charts"+bcolors.ENDC)
     print()
@@ -168,12 +168,23 @@ def main():
         charts=os.listdir(".")
         print()
         print(bcolors.HEADER+bcolors.UNDERLINE+"Song (charter)"+bcolors.ENDC+" "*(TERMINAL_WIDTH()-21)+bcolors.HEADER+bcolors.UNDERLINE+"Status"+bcolors.ENDC+" ")
+        msd={}
         for i, chart in enumerate(charts, 1):
             sm=[f for f in os.listdir(chart) if f.endswith(".sm")]
             # is there .sm?
             if len(sm)>0:
                 sm=sm[0]
                 os.chdir(chart)
+
+                rate=1.0
+                score_goal=0.93
+                out=subprocess.run(["..\\..\\..\\tools\\win32\\minacalc.exe", sm, str(rate), str(score_goal)], stdout=subprocess.PIPE).stdout.splitlines()
+                for line in out:
+                    line=line.decode()
+                    if "|" in line:
+                        line=line.split("|")
+                        msd[line[0].strip()+" "+str(rate) +"x - "]=list(map(float,line[1:]))
+
                 if platform == "win32":
                     subprocess.run([f'..\\..\\..\\tools\\win32\\raindrop\\raindrop.exe', '-g', 'om', '-i', sm, '-o', '.'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 else:
@@ -208,6 +219,14 @@ def main():
                                         title=''.join(title).strip()
                                         edit.write("TitleUnicode: "+packfolder+" - "+title)
                                         edit.write("\n")
+                                    elif "Version:" in f[j]:
+                                        diff_name=re.split("[: (]", f[j])[2]+" 1.0x - "
+                                        if diff_name in msd:
+                                            edit.write("Version: "+diff_name+str(round(msd[diff_name][0], 2)) + " MSD")
+                                            edit.write("\n")
+                                        else:
+                                            edit.write(f[j])
+
                                     elif "AudioFilename:" in f[j]:
                                         audio=re.split("[:]", f[j])[-1].strip()
                                         if audio[0]==" ":
