@@ -114,13 +114,13 @@ def main():
         HP=7
     print()
     try:
-        msd_filter=float(input("Specify the minimum overall MSD of all converted charts, this will determine uprate (example msd: 23.43) >> "))
+        max_msd=float(input("Specify the maximum overall MSD of uprates (example msd: 23.43) >> "))
     except:
-        print("Invalid MSD value, no uprates will be carried out")
-        msd_filter=-1
-    if msd_filter>100:
-        print("Invalid MSD value, defaulting to HP 7")
-        msd_filter=-1
+        print("Invalid MSD value, there will be no maximum msd of uprates")
+        max_msd=-1
+    if max_msd>100:
+        print("MSD value has to be within 1.0 to 100.0")
+        max_msd=-1
         HP=7
     print()
     try:
@@ -152,6 +152,13 @@ def main():
         print("Invalid creator, defaulting to bobermilk")
         creator="bobermilk"
     print()
+    
+    rates=(0.9, 1.4, 26.5) # minimum_rate, maximum_rate, max_msd
+    keep_pitch=True
+    diff_name_skillset_msd_titles=("Stream", "JS", "HS", "Stam", "JckSpd", "CJ", "Tech")
+    diff_name_skillset_msd=(1,0,0,1,0,1,1) # Stream, JS, HS, Stamina, JckSpd, CJ, Tech
+    uprate_half_increments=False # DANGER: DOUBLE THE SPAM
+
     print(bcolors.HEADER+"All the converted maps can have a constant offset error of ±15 miliseconds (human error + different setups)"+bcolors.ENDC)
     user_offset=input("Integer offset in milliseconds to be applied to all converted maps (use negative offset if song is coming earlier) >> ")
     if not user_offset:
@@ -190,6 +197,7 @@ def main():
         charts=os.listdir(".")
         print()
         print(bcolors.HEADER+bcolors.UNDERLINE+"Song (charter)"+bcolors.ENDC+" "*(TERMINAL_WIDTH()-21)+bcolors.HEADER+bcolors.UNDERLINE+"Status"+bcolors.ENDC+" ")
+        stop=0
         msd={}
         for i, chart in enumerate(charts, 1):
             sm=[f for f in os.listdir(chart) if f.endswith(".sm")]
@@ -198,14 +206,27 @@ def main():
                 sm=sm[0]
                 os.chdir(chart)
 
-                rate=1.0
+                if uprate_half_increments:
+                    divisor=20
+                else:
+                    divisor=10
                 score_goal=0.93
-                out=subprocess.run(["..\\..\\..\\tools\\win32\\minacalc.exe", sm, str(rate), str(score_goal)], stdout=subprocess.PIPE).stdout.splitlines()
-                for line in out:
-                    line=line.decode()
-                    if "|" in line:
-                        line=line.split("|")
-                        msd[line[0].strip()+" "+str(rate) +"x - "]=[round(x, 1) for x in list(map(float,line[1:]))]
+                # msd{rate} - diff_names{name} - skillset_msd[]
+                for _rate in range(rates[0]*divisor, rates[1]*divisor+1) :
+                    rate=_rate/divisor
+                    diff_names={}
+                    out=subprocess.run(["..\\..\\..\\tools\\win32\\minacalc.exe", sm, str(rate), str(score_goal)], stdout=subprocess.PIPE).stdout.splitlines()
+                    for line in out:
+                        line=line.decode()
+                        if "|" in line:
+                            line=line.split("|")
+                            skillset_msd=[round(x, 1) for x in list(map(float,line[1:]))]
+                            name=line[0].strip()
+                            diff_names[name]=skillset_msd
+                    if skillset_msd<=rates[2]:
+                        msd[rate]=diff_names
+                    else:
+                        break
 
                 if platform == "win32":
                     subprocess.run([f'..\\..\\..\\tools\\win32\\raindrop\\raindrop.exe', '-g', 'om', '-i', sm, '-o', '.'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -244,11 +265,15 @@ def main():
                                     elif "Version:" in f[j]:
                                         diff_name=re.split("[: (]", f[j])[2]
                                         if diff_name in msd:
-                                            skillset_msd=msd[diff_name][1]
-                                            skillset_msd_text=""
-                                            if show_skillset_msd:
-                                                skillset_msd_text=f" (Stream:{skillset_msd[1]} | JS:{skillset_msd[2]} | HS:{skillset_msd[3]} | Stam:{skillset_msd[4]} | JkSpd:{skillset_msd[5]} | Tech:{skillset_msd[6]})"
-                                            edit.write("Version: "+diff_name+ + " MSD" + skillset_msd_text)
+                                            skillset_msd=msd[1.0][diff_name][1]
+                                            skillset_msd_text="("
+                                            for skillset_msd_title, skillset_msd_value in zip(diff_name_skillset_msd_titles, diff_name_skillset_msd):
+                                                skillset_msd_text+=f"{skillset_msd_title}:{skillset_msd_value}"
+                                                skillset_msd_text+=" | "
+                                            skillset_msd_text=skillset_msd_text[:-3]
+                                            skillset_msd_text+=")"
+
+                                            edit.write("Version: "+diff_name+ " 1.0x - "+skillset_msd[0] +" MSD " + skillset_msd_text)
                                             edit.write("\n")
                                         else:
                                             edit.write(f[j])
@@ -259,7 +284,6 @@ def main():
                                             audio=audio[1:]
                                         # is there a entry
                                         if "." in audio:
-                                            stop=False
                                             if not os.path.isfile(f"..\\{audio_filename}"):
                                                 if platform == "win32":
                                                     sample_rate=int(subprocess.run(["..\\..\\..\\tools\\win32\\sox\\sox.exe", "--i", "-r", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
@@ -414,14 +438,27 @@ def main():
                                         skip=True
                                     elif not skip:
                                         edit.write(f[j])
-                except:
-                    stop=True
-                if not stop:
-                    msg="[ Good ✓ ]"
+
+                    # get range not exceeding msd
+                    # call uprate on range
+                    # double checking
+                    if os.isfile(audio_filename):
+                        for _rate in range(rates[0]*divisor, rates[1]*divisor+1) :
+                            rate=_rate/divisor
                     print(chart+" "*(TERMINAL_WIDTH()-len(chart)-len(msg)-1)+bcolors.OKGREEN+msg+bcolors.ENDC)
+                except:
+                    stop=1
+                if stop==0:
+                    msg="[ Good ✓ ]"
                 else:
-                    failed.append(chart)
-                    print(chart+"  "+bcolors.WARNING+"-"*(TERMINAL_WIDTH()-len(chart)-16)+">  "+bcolors.FAIL+"[ Fail ✗ ]"+bcolors.ENDC)
+                    if stop==1:
+                        stop_err="[ Fail ✗ ]"
+                        stop_err_color=bcolors.FAIL
+                    else:
+                        stop_err="[ Uprate Fail ✗ ]"
+                        stop_err_color=bcolors.WARNING
+                    failed.append((chart, stop_err))
+                    print(chart+"  "+bcolors.WARNING+"-"*(TERMINAL_WIDTH()-len(chart)-(len(stop_err)+6))+">  "+stop_err_color+stop_err+bcolors.ENDC)
                 os.chdir("..")
         # wrap things up and move them to output
         output=[f for f in os.listdir(".") if os.path.isfile(f)]
