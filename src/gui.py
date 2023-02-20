@@ -78,15 +78,15 @@ class ChartAttributes(Container):
                 ),
                 Vertical(
                     Labels("   Creator Name", classes="label"),
-                    Input(value="bobermilk", placeholder="bobermilk"),
+                    Input(placeholder="Example: bobermilk"),
                 ),
                 Horizontal(
-                    Static("   Remove short lns:                           ", classes="btnLabel"),
+                    Static("   Remove short lns                            ", classes="btnLabel"),
                     Switch(value=True),
                     classes="container",
                 ),
                 Horizontal(
-                    Static("   Uprate by 0.05 instead of 0.01\n   (warning: this is 2x spam):                 ", classes="btnLabel"),
+                    Static("   Uprate by 0.05 instead of 0.01\n   (warning: this is 2x spam)                  ", classes="btnLabel"),
                     Switch(value=False),
                     classes="container",
                 ),
@@ -105,16 +105,16 @@ class ChartAttributes(Container):
                         classes="column"),
                 ),
                 Vertical(
-                    Labels("   Maximum msd to restrict further uprates (1MSD to 100MSD)", classes="label"),
+                    Labels("   Maximum msd for rates (1MSD to 100MSD)", classes="label"),
                     Input(placeholder="Example: 28.42"),
                     classes="column"),
                 Horizontal(
-                    Static("   Show skillset msd in diff names:            ", classes="btnLabel"),
+                    Static("   Show skillset msd in diff names             ", classes="btnLabel"),
                     Switch(value=False),
                     classes="container",
                 ),
                 Horizontal(
-                    Static("   Keep audio pitch in uprates:                ", classes="btnLabel"),
+                    Static("   Keep audio pitch in uprates                 ", classes="btnLabel"),
                     Switch(value=True),
                     classes="container",
                 ),
@@ -154,7 +154,12 @@ class ChartAttributes(Container):
             notification_text+="    - HP out of bounds, please retry with a value within 1-10"
             fail=True
 
-        creator=inputs[2]
+        try:
+            creator=str(inputs[2]).strip()
+        except:
+            log_text+="\n"
+            log_text+="Invalid creator, defaulting to bobermilk"
+            creator="bobermilk"
         if not creator:
             log_text+="\n"
             log_text+="Invalid creator, defaulting to bobermilk"
