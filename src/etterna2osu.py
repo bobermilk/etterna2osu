@@ -3,7 +3,6 @@ import zipfile
 import shutil
 import re
 import subprocess
-import multiprocessing
 import urllib.request, json 
 from PIL import Image
 from math import floor, ceil
@@ -28,6 +27,22 @@ class bcolors:
 
 def TERMINAL_WIDTH():
     return os.get_terminal_size().columns
+
+def rateChangeMap(rate, osu, s0, s1, s2, s3, s4, s5, s6, s7):
+    subprocess.run(["..\\..\\..\\tools\\win32\\RateChanger\\RateChanger.exe", 
+                    str(False),
+                    os.path.join(os.getcwd(), osu), 
+                    str(osu), 
+                    s0, s1, s2, s3, s4, s5, s6, s7, str(rate)], shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+
+def rateChangeAudio(rates, i, keep_pitch):
+    cmd=["..\\..\\..\\tools\\win32\\RateChanger\\RateChanger.exe", 
+                    str(True),
+                    os.path.join(os.path.dirname(os.getcwd()), str(i)), 
+                    str(keep_pitch)]
+    for rate in rates:
+        cmd.append(str(rate))
+    subprocess.run(cmd, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
 def cleanup():
     target_folders = [f for f in os.listdir(".") if not os.path.isfile(f)]
@@ -115,28 +130,6 @@ def main():
         HP=7
     print()
     try:
-        max_msd=float(input("Specify the maximum overall MSD of uprates (example msd: 23.43) >> "))
-    except:
-        print("Invalid MSD value, there will be no maximum msd of uprates")
-        max_msd=-1
-    if max_msd>100:
-        print("MSD value has to be within 1.0 to 100.0")
-        max_msd=-1
-        HP=7
-    print()
-    try:
-        show_skillset_msd=str(input("Show skillset MSD in the diff names? [y/n]")).strip()
-        if show_skillset_msd=="y" or show_skillset_msd=="Y":
-            print("Skillset MSD values will be in the diff names")
-            show_skillset_msd=True
-        else:
-            print("Only overall MSD will be shown in the diff names")
-            show_skillset_msd=False
-    except:
-        print("Only overall MSD will be shown in the diff names")
-        show_skillset_msd=False
-    print()
-    try:
         remove_ln=str(input("Change short LNs to normal note? (hold duration <= 1/8) [y/n] >> ")).strip()
         if remove_ln=="y" or remove_ln=="Y":
             print("Short LNs will be changed to normal note")
@@ -156,8 +149,8 @@ def main():
     
     rates=(0.9, 1.4, 26.5) # minimum_rate, maximum_rate, max_msd
     keep_pitch=True
-    diff_name_skillset_msd_titles=("Stream", "JS", "HS", "Stam", "JckSpd", "CJ", "Tech")
-    diff_name_skillset_msd=(1,0,0,1,0,1,1) # Stream, JS, HS, Stamina, JckSpd, CJ, Tech
+    diff_name_skillset_msd_titles=("Str", "JS", "HS", "Sta", "JaSp", "CJ", "Tech")
+    diff_name_skillset_msd=[True]*7 # Str, JS, HS, Stamina, JaSp, CJ, Tech
     uprate_half_increments=False # DANGER: DOUBLE THE SPAM
 
     print(bcolors.HEADER+"All the converted maps can have a constant offset error of ±15 miliseconds (human error + different setups)"+bcolors.ENDC)
@@ -199,21 +192,20 @@ def main():
         print()
         print(bcolors.HEADER+bcolors.UNDERLINE+"Song (charter)"+bcolors.ENDC+" "*(TERMINAL_WIDTH()-21)+bcolors.HEADER+bcolors.UNDERLINE+"Status"+bcolors.ENDC+" ")
         stop=0
-        msd={}
         for i, chart in enumerate(charts, 1):
+            msd={}
             sm=[f for f in os.listdir(chart) if f.endswith(".sm")]
             # is there .sm?
             if len(sm)>0:
                 sm=sm[0]
                 os.chdir(chart)
-
                 if uprate_half_increments:
                     divisor=20
                 else:
                     divisor=10
                 score_goal=0.93
                 # msd{rate} - diff_names{name} - skillset_msd[]
-                for _rate in range(rates[0]*divisor, rates[1]*divisor+1) :
+                for _rate in range(int(rates[0]*divisor), int(rates[1]*divisor)+1) :
                     rate=_rate/divisor
                     diff_names={}
                     out=subprocess.run(["..\\..\\..\\tools\\win32\\minacalc.exe", sm, str(rate), str(score_goal)], stdout=subprocess.PIPE).stdout.splitlines()
@@ -223,9 +215,12 @@ def main():
                             line=line.split("|")
                             skillset_msd=[round(x, 1) for x in list(map(float,line[1:]))]
                             name=line[0].strip()
-                            diff_names[name]=skillset_msd
-                    if skillset_msd<=rates[2]:
+                            if skillset_msd[0]<=rates[2] or rate==1.0:
+                                diff_names[name]=skillset_msd
+                    if len(diff_names)>0:
                         msd[rate]=diff_names
+                    elif not "1.0" in msd.keys():
+                        continue
                     else:
                         break
 
@@ -240,7 +235,7 @@ def main():
                 background_filename="foobaruwu"
                 try:
                     for osu in osues:
-                        with open(f"..\\{osu}", "a", encoding="utf8") as edit:
+                        with open(f"{osu}.tmp", "a", encoding="utf8") as edit:
                             skip=False
                             with open(osu, encoding="utf8") as beatmap:
                                 f=beatmap.readlines()
@@ -265,16 +260,16 @@ def main():
                                         edit.write("\n")
                                     elif "Version:" in f[j]:
                                         diff_name=re.split("[: (]", f[j])[2]
-                                        if diff_name in msd:
-                                            skillset_msd=msd[1.0][diff_name][1]
+                                        if diff_name in msd[1.0]:
+                                            skillset_msd=msd[1.0][diff_name]
                                             skillset_msd_text="("
-                                            for skillset_msd_title, skillset_msd_value in zip(diff_name_skillset_msd_titles, diff_name_skillset_msd):
-                                                skillset_msd_text+=f"{skillset_msd_title}:{skillset_msd_value}"
-                                                skillset_msd_text+=" | "
-                                            skillset_msd_text=skillset_msd_text[:-3]
+                                            for skillset_msd_title, skillset_msd_value, skillset_msd_commit in zip(diff_name_skillset_msd_titles, skillset_msd[1:], diff_name_skillset_msd):
+                                                if skillset_msd_commit:
+                                                    skillset_msd_text+=f"{skillset_msd_title}:{skillset_msd_value}"
+                                                    skillset_msd_text+="|"
+                                            skillset_msd_text=skillset_msd_text[:-1]
                                             skillset_msd_text+=")"
-
-                                            edit.write("Version: "+diff_name+ " 1.0x - "+skillset_msd[0] +" MSD " + skillset_msd_text)
+                                            edit.write("Version: "+diff_name+ " 1.0x - "+str(skillset_msd[0]) +" MSD " + skillset_msd_text)
                                             edit.write("\n")
                                         else:
                                             edit.write(f[j])
@@ -441,21 +436,40 @@ def main():
                                         edit.write(f[j])
 
                     # double checking
-                    if os.isfile(audio_filename):
+                    if os.path.isfile(f"..\{audio_filename}"):
                         try:
-                            with multiprocessing.Pool(processes=4) as pool:
-                                RateChanger=lambda rate, osu, diff_name: subprocess.run(["..\\..\\..\\tools\\win32\\RateChanger.exe", os.path.join(os.path.pardir(), osu), osu, os.path.join(os.path.pardir(), i), keep_pitch, rate, msd[rate][diff_name]])
-                                rates=msd.keys()
-                                tasks=[]
-                                for rate in rates:
-                                    for osu in osues:
+                            for osu in osues:
+                                os.remove(osu)
+                            osues=[f for f in os.listdir(".") if f.endswith(".tmp")]
+                            for osu in osues:
+                                os.rename(osu, osu[:-4])
+                            osues=[f for f in os.listdir(".") if f.endswith(".osu")]
+                            msd_rates=msd.keys()
+                            tasks_audio=[]
+                            tasks_maps=[]
+                            for rate in msd_rates:
+                                for osu in osues:
+                                    if rate != 1.0:
                                         diff_name=re.findall("\[(.*?)\]",osu)[-1].split("(")[0]
-                                        tasks.append((rate, osu, diff_name))
-                                pool.starmap(RateChanger, tasks)
+                                        s=list(map(str, msd[rate][diff_name]))
+                                        tasks_maps.append((rate, osu, s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]))
+                                        tasks_audio.append(rate)
+
+                            # pool.starmap(rateChangeMap, tasks_maps)
+                            for t in tasks_maps:
+                                rateChangeMap(t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9])
+                            rateChangeAudio(tasks_audio, i, keep_pitch)
+                                    
+                            osues=[f for f in os.listdir(".") if f.endswith(".osu") or f.endswith(".mp3")]
+                            for osu in osues:
+                                shutil.move(osu, "..")
                         except Exception as e:
                             stop=2
-                            print(e)
-                except:
+                except Exception as e:
+                    # import sys
+                    # exc_type, exc_obj, exc_tb = sys.exc_info()
+                    # fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                    # print(exc_type, fname, exc_tb.tb_lineno)
                     stop=1
                 if stop==0:
                     msg="[ Good ✓ ]"
@@ -474,9 +488,9 @@ def main():
         output=[f for f in os.listdir(".") if os.path.isfile(f)]
         print()
         print(bcolors.OKCYAN+f"Writing data to {packfolder}.osz"+bcolors.ENDC)
-        with zipfile.ZipFile(f'..\{packfolder}.osz', 'w') as zip:        
+        with zipfile.ZipFile(f'..\{packfolder}.osz', 'w') as osz:        
             for file in output:
-                zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
+                osz.write(file, compress_type=zipfile.ZIP_DEFLATED)
 
         # move on to the next pack
         os.chdir("..")
@@ -490,4 +504,5 @@ def main():
     print(f"Beatmaps files generated can be found in the {TARGET_DIR} folder")
     print(bcolors.OKGREEN+"All done! The converted files are all correctly timed :3"+bcolors.ENDC)
 
-main()
+if __name__ == '__main__':
+    main()

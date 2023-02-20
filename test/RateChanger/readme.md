@@ -1,0 +1,1 @@
+`.\RateChanger.exe "C:\Users\morga\Desktop\OffsetCalculator\test\RateChanger\bin\Debug\net45\chicken.osu" "chicken.osu" "C:\Users\morga\Desktop\OffsetCalculator\test\RateChanger\bin\Debug\net45\chicken" True 1.3 23.4 23.2 23.3 23.4 23.5 23.6 23.5 23.4`

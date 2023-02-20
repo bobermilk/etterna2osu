@@ -66,7 +66,7 @@ namespace RateChanger
         }
 
         // Convert the .osu map, returns if successful
-        public bool Start(string filePath, string fileName, double rate, bool useOffset, double msd)
+        public bool Start(string filePath, string fileName, double rate, string msd_overall, string msd_stream, string msd_jumpstream, string msd_handstream, string msd_stamina, string msd_jackspeed, string msd_chordjack, string msd_tech, bool useOffset)
         {
             _rate = rate;
             _audioOffset = useOffset ? 80 : 0;
@@ -105,7 +105,7 @@ namespace RateChanger
                         {
                             originalAudioFile = lines[i].Split(':')[1].Trim(' ');
                             string audioName = originalAudioFile.Remove(originalAudioFile.Length - 4);
-                            newLine = "AudioFilename: " + audioName + rate * 100 + ".mp3";
+                            newLine = "AudioFilename: " + audioName + "-" + rate * 100 + ".mp3";
                         }
                         if (line.Contains("PreviewTime:"))
                         {
@@ -175,7 +175,35 @@ namespace RateChanger
                             if (rate != 1.0) {
                                 string[] bleh = line.Split(null);
                                 bleh[2] = rate + "x";
-                                bleh[4] = msd.ToString(CultureInfo.CurrentCulture);
+                                bleh[4] = msd_overall;
+                                string last_bleh=bleh[bleh.Length-1];
+                                if (last_bleh.Contains("(")) {
+                                    string newSkillsetMsd = "(";
+                                    if(last_bleh.Contains("Str")) {
+                                        newSkillsetMsd += "Str:" + msd_stream+"|";
+                                    }
+                                    if(last_bleh.Contains("JS")) {
+                                        newSkillsetMsd += "JS:" + msd_jumpstream+"|";
+                                    }
+                                    if(last_bleh.Contains("HS")) {
+                                        newSkillsetMsd += "HS:" + msd_handstream+"|";
+                                    }
+                                    if(last_bleh.Contains("Sta")) {
+                                        newSkillsetMsd += "Sta:" + msd_stamina+"|";
+                                    }
+                                    if(last_bleh.Contains("JaSp")) {
+                                        newSkillsetMsd += "JaSp:" + msd_jackspeed+"|";
+                                    }
+                                    if(last_bleh.Contains("CJ")) {
+                                        newSkillsetMsd += "CJ:" + msd_chordjack+"|";
+                                    }
+                                    if(last_bleh.Contains("Tech")) {
+                                        newSkillsetMsd += "Tech:" + msd_tech+"|";
+                                    }
+                                    newSkillsetMsd=newSkillsetMsd.Substring(0, newSkillsetMsd.Length - 1);
+                                    newSkillsetMsd += ")";
+                                    bleh[bleh.Length - 1] = newSkillsetMsd;
+                                }
                                 newLine = String.Join(" ", bleh.Where(s => !String.IsNullOrEmpty(s)));
                             }
                             else
