@@ -11,8 +11,8 @@ from sys import platform, exit
 APP_VERSION=2
 TARGET_DIR="etterna2osu_song_packs"
 
-offset=-26
 failed=[]
+diff_name_skillset_msd_titles=("Str", "JS", "HS", "Sta", "JaSp", "CJ", "Tech")
 
 class bcolors:
     HEADER = '\033[95m'
@@ -49,7 +49,7 @@ def cleanup():
     for folder in target_folders:
         shutil.rmtree(folder)
 
-def main():
+def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, uprate_half_increments, keep_pitch):
     # fix win 10 colors
     if os.name == "nt":
         import ctypes
@@ -111,67 +111,7 @@ def main():
     for i, file in enumerate(target_files, 1):
         print(f"    {i}. "+file)
     print()
-    try:
-        OD=int(input("What OD would you like? you can enter 1-10 >> "))
-    except:
-        print("Invalid OD, defaulting to OD 8")
-        OD=8
-    if OD not in range(1,11):
-        print("Invalid OD, defaulting to OD 8")
-        OD=8
-    print()
-    try:
-        HP=int(input("What HP would you like? you can enter 1-10 >> "))
-    except:
-        print("Invalid HP, defaulting to HP 7")
-        HP=7
-    if HP not in range(1,11):
-        print("Invalid HP, defaulting to HP 7")
-        HP=7
-    print()
-    try:
-        remove_ln=str(input("Change short LNs to normal note? (hold duration <= 1/8) [y/n] >> ")).strip()
-        if remove_ln=="y" or remove_ln=="Y":
-            print("Short LNs will be changed to normal note")
-            remove_ln=True
-        else:
-            print("Short LNs will remain")
-            remove_ln=False
-    except:
-        print("Short LNs will remain")
-        remove_ln=False
-    print()
-    creator=input("Enter the name you want as the creator of the converts >> ")
-    if not creator:
-        print("Invalid creator, defaulting to bobermilk")
-        creator="bobermilk"
-    print()
-    
-    rates=(0.9, 1.4, 26.5) # minimum_rate, maximum_rate, max_msd
-    keep_pitch=True
-    diff_name_skillset_msd_titles=("Str", "JS", "HS", "Sta", "JaSp", "CJ", "Tech")
-    diff_name_skillset_msd=[True]*7 # Str, JS, HS, Stamina, JaSp, CJ, Tech
-    uprate_half_increments=False # DANGER: DOUBLE THE SPAM
 
-    print(bcolors.HEADER+"All the converted maps can have a constant offset error of ±15 miliseconds (human error + different setups)"+bcolors.ENDC)
-    user_offset=input("Integer offset in milliseconds to be applied to all converted maps (use negative offset if song is coming earlier) >> ")
-    if not user_offset:
-        user_offset=0
-    else:
-        user_offset=user_offset.lstrip("-")
-        if user_offset.isdigit():
-            user_offset=int(user_offset)
-            if user_offset in range(-1000,1001):
-                global offset
-                offset+=user_offset
-            else:
-                print("User offset too large, (max 1000 milliseconds)")
-                user_offset=0
-        else:
-            user_offset=0
-
-    print(f"{user_offset} milliseconds will be applied to all converted maps")
-    print()
     input(bcolors.WARNING +"Press enter to start the conversions on all the song packs in the folder"+bcolors.ENDC)
     os.chdir(TARGET_DIR)
     cleanup()
@@ -466,10 +406,10 @@ def main():
                         except Exception as e:
                             stop=2
                 except Exception as e:
-                    # import sys
-                    # exc_type, exc_obj, exc_tb = sys.exc_info()
-                    # fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                    # print(exc_type, fname, exc_tb.tb_lineno)
+                    import sys
+                    exc_type, exc_obj, exc_tb = sys.exc_info()
+                    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                    print(exc_type, fname, exc_tb.tb_lineno)
                     stop=1
                 if stop==0:
                     msg="[ Good ✓ ]"
@@ -503,6 +443,3 @@ def main():
     print()
     print(f"Beatmaps files generated can be found in the {TARGET_DIR} folder")
     print(bcolors.OKGREEN+"All done! The converted files are all correctly timed :3"+bcolors.ENDC)
-
-if __name__ == '__main__':
-    main()

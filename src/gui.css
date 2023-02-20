@@ -26,6 +26,10 @@ Button{
     width: auto;
 }
 
+.chicken {
+    height: 88%;
+}
+
 Switch {
     height: auto;
     width: auto;

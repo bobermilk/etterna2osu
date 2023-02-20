@@ -8,6 +8,8 @@ from rich.console import RenderableType
 from rich.markdown import Markdown
 from rich.text import Text
 
+import util
+
 from textual.widgets import (
     Button,
     Footer,
@@ -15,18 +17,17 @@ from textual.widgets import (
     Input,
     Static,
     Switch,
-    TextLog,
 )
 
-def clear_note(self) -> None:
-    self.query_one(TextLog).clear()
+# def clear_note(self) -> None:
+#     self.query_one(TextLog).clear()
 
-def add_note(self, renderable: RenderableType) -> None:
-    self.query_one(TextLog).write(renderable)
+# def add_note(self, renderable: RenderableType) -> None:
+#     self.query_one(TextLog).write(renderable)
 
 def notify(self, message):
     message=message.strip()
-    add_note(self.app, message+"\n")
+    # add_note(self.app, message+"\n")
     self.app.bell()
     message=Text.assemble(message)
     self.screen.mount(Notification(message))
@@ -46,19 +47,36 @@ class SectionTitle(Labels):
 
 class Body(Container):
     def compose(self) -> ComposeResult:
-        yield Container(
-            TextLog(classes="-hidden", wrap=False, highlight=True, markup=True),
-            configuration,
-        )
+        yield welcome
 
 class Welcome(Container):
     def compose(self) -> ComposeResult:
-        yield Labels(Markdown("# hello"))
+    # print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-27)/2)+f"etterna2osu v{APP_VERSION} by bobermilk"+bcolors.ENDC)
+    # print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-92)/2)+"DM milk#6867 on discord for any queries after reading FAQs at https://milkies.ml/etterna2osu"+bcolors.ENDC)
+    # print(bcolors.OKBLUE+" "*int((TERMINAL_WIDTH()-88)/2)+"Thank you demi, kangalio, guil, marc, chxu, senya, gonx, messica for helping me make this"+bcolors.ENDC)
+    # print()
+    # print(bcolors.FAIL+" "*int((TERMINAL_WIDTH()-96)/2)+"bobermilk is not liable for any distribution of the converted packs, only upload your own charts"+bcolors.ENDC)
+    # print()
+    # print(bcolors.HEADER+"You can obtain etterna packs zips at https://etternaonline.com/packs"+bcolors.ENDC)
+        yield Labels(Markdown(f"# etterna2osu v{util.APP_VERSION} by bobermilk\n"+
+                              "## Thank you demi, kangalio, guil, marc, chxu, senya, gonx, messica for helping me make this\n"+
+                              "### DM milk#6867 on discord for any queries after reading FAQs at https://milkies.ml/etterna2osu\n"+
+                              "### bobermilk is not liable for any distribution of the converted packs, only upload your own charts"), classes="chicken")
         yield Button("Start", variant="success")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         body.mount(ChartAttributes())
         welcome.remove()
+
+OD=8
+HP=7
+offset=-26
+creator="bobermilk"
+rates=[0.9, 1.4, 26.5] # minimum_rate, maximum_rate, max_msd
+remove_ln=False
+diff_name_skillset_msd=[False]*7 # Str, JS, HS, Stamina, JaSp, CJ, Tech
+uprate_half_increments=False # DANGER: DOUBLE THE SPAM
+keep_pitch=True
 
 class ChartAttributes(Container):
     def compose(self) -> ComposeResult:
@@ -74,6 +92,10 @@ class ChartAttributes(Container):
                     Vertical(
                         Labels("   HP (1 to 10)", classes="label"),
                         Input(placeholder="7"),
+                        classes="column"),
+                    Vertical(
+                        Labels("   Global offset", classes="label"),
+                        Input(placeholder="Example: -10"),
                         classes="column"),
                 ),
                 Vertical(
@@ -121,12 +143,13 @@ class ChartAttributes(Container):
                 classes="column",
             ),
         ),
-        Button("Start Conversion", variant="primary"),
+        Button("Continue", variant="primary"),
         Static(),
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        clear_note(self.app)
+        global OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, uprate_half_increments, keep_pitch
+        # clear_note(self.app)
         log_text=""
         notification_text="Configuration Errors:"
         fail=False
@@ -155,7 +178,30 @@ class ChartAttributes(Container):
             fail=True
 
         try:
-            creator=str(inputs[2]).strip()
+            user_offset=inputs[2]
+            if not user_offset:
+                user_offset=0
+            else:
+                user_offset=user_offset.lstrip("-")
+                if user_offset.isdigit():
+                    user_offset=int(user_offset)
+                    if user_offset in range(-1000,1001):
+                        global offset
+                        offset+=user_offset
+                    else:
+                        notification_text+="\n"
+                        notification_text+="    - User offset too large, (max 1000 milliseconds)"
+                        fail=True
+                        user_offset=0
+                else:
+                    user_offset=0
+        except:
+            user_offset=0
+
+        log_text+="\n"
+        log_text+=f"Warning: {user_offset} milliseconds will be applied to all converted maps"
+        try:
+            creator=str(inputs[3]).strip()
         except:
             log_text+="\n"
             log_text+="Invalid creator, defaulting to bobermilk"
@@ -166,37 +212,40 @@ class ChartAttributes(Container):
             creator="bobermilk"
 
         try:
-            lowest_rate=float(inputs[3])
+            lowest_rate=float(inputs[4])
         except:
             log_text+="\n"
             log_text+="Warning: Invalid lowest rate, defaulting to 1.0"
             lowest_rate=1.0
         if lowest_rate>1 or lowest_rate<0.8:
             notification_text+="\n"
-            notification_text+="    - lowest rate out of bounds, please retry with a value in range 0.8 to 1.0"
+            notification_text+="    - Lowest rate out of bounds, please retry with a value in range 0.8 to 1.0"
             fail=True
+        rates[0]=lowest_rate
 
         try:
-            highest_rate=float(inputs[4])
+            highest_rate=float(inputs[5])
         except:
             log_text+="\n"
             log_text+="Warning: Invalid highest rate, defaulting to 1.0"
             highest_rate=1.0
         if highest_rate<1.0 or highest_rate>1.45:
             notification_text+="\n"
-            notification_text+="    - lowest rate out of bounds, please retry with a value in range 1.0 and 1.45"
+            notification_text+="    - Highest rate out of bounds, please retry with a value in range 1.0 and 1.45"
             fail=True
+        rates[1]=highest_rate
 
         try:
-            max_msd=float(inputs[5])
+            max_msd=float(inputs[6])
         except:
             log_text+="\n"
             log_text+="Warning: Invalid maximum msd, no msd limit will be set on uprates"
-            max_msd=10000.0
+            max_msd=100.0
         if max_msd<1.0 or max_msd>100.0:
             notification_text+="\n"
-            notification_text+="    - lowest rate out of bounds, please retry with a value in range 1.0 and 100.0"
+            notification_text+="    - minimum msd out of bounds, please retry with a value in range 1.0 and 100.0"
             fail=True
+        rates[2]=max_msd
 
         buttons=[x.value for x in self.query(Switch)]
         remove_ln=buttons[0]
@@ -217,36 +266,82 @@ class ChartAttributes(Container):
             log_text+="\n"
             log_text+="Warning: Disabling keep audio pitch creates nightcore"
 
-        add_note(self.app, log_text +"\n")
-        notify(self, notification_text)
+        if not notification_text=="Configuration Errors:":
+            notify(self, notification_text)
         if not fail:
             if show_skillset_msd:
                 body.mount(skillset_msd)
             else:
-                body.mount(conversion_progress)
+                self.app.exit(result=True)
             self.remove()
 
 
 class SkillsetMsd(Container):
     def compose(self) -> ComposeResult:
-        yield Labels()
+        yield Vertical(
+            SectionTitle("Select skillset MSD to be written into diff names"),
+            Static(),
+            Horizontal(
+                Vertical(
+                    Horizontal(
+                        Static("    Stream    ", classes="btnLabel"),
+                        Switch(value=True),
+                        classes="container",
+                    ),
+                    Horizontal(
+                        Static("    JumpStream", classes="btnLabel"),
+                        Switch(value=True),
+                        classes="container",
+                    ),
+                    Horizontal(
+                        Static("    HandStream", classes="btnLabel"),
+                        Switch(value=True),
+                        classes="container",
+                    ),
+                    Horizontal(
+                        Static("    Stamina   ", classes="btnLabel"),
+                        Switch(value=True),
+                        classes="container",
+                    ),            
 
-class ConversionProgress(Container):
-    def compose(self) -> ComposeResult:
-        yield Labels()
+                classes="column"),
+                Vertical(
+                    Horizontal(
+                        Static("    JackSpeed ", classes="btnLabel"),
+                        Switch(value=True),
+                        classes="container",
+                    ),            
+                    Horizontal(
+                        Static("    ChordJack ", classes="btnLabel"),
+                        Switch(value=True),
+                        classes="container",
+                    ),
+                    Horizontal(
+                        Static("    Technical ", classes="btnLabel"),
+                        Switch(value=True),
+                        classes="container",
+                    ),
+                classes="column"),
+            ),
+            Button("Continue", variant="primary"),
+        )
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        global diff_name_skillset_msd
+        diff_name_skillset_msd=[x.value for x in self.query(Switch)]
+        self.app.exit(result=True)
+
 
 # LinearLayout (https://textual.textualize.io/guide/layout/)
 body=Body()
 welcome=Welcome()
 configuration=ChartAttributes()
 skillset_msd=SkillsetMsd()
-conversion_progress=ConversionProgress()
 
 class etterna2osu(App):
     CSS_PATH = "gui.css"
     BINDINGS = [("ctrl+d", "toggle_dark", "Toggle dark mode"),
         ("ctrl+c", "app.quit", "Quit"),
-        ("f1", "app.toggle_class('TextLog', '-hidden')", "Recent Logs"),
+        # ("f1", "app.toggle_class('TextLog', '-hidden')", "Recent Logs"),
         ]
 
     def compose(self) -> ComposeResult:
@@ -261,4 +356,10 @@ class etterna2osu(App):
 
 if __name__ == "__main__":
     app = etterna2osu()
-    app.run()
+    tui_result=app.run()
+    try:
+        if tui_result:
+            util.main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, uprate_half_increments, keep_pitch)
+    except:
+        pass
+
