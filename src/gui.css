@@ -1,0 +1,83 @@
+/*https://textual.textualize.io/guide/layout/#__tabbed_4_2*/
+Input {
+    content-align: center middle;
+    max-height: 50%;
+}
+.column {
+    width: 1fr;
+}
+Vertical{
+    padding:1;
+}
+
+Button{
+    width: 100%;
+    margin-left: 2;
+    margin-right: 2;
+}
+
+.btnLabel {
+    height: 3;
+    content-align: center middle;
+    width: auto;
+}
+.container {
+    height: auto;
+    width: auto;
+}
+
+Switch {
+    height: auto;
+    width: auto;
+}
+Labels {
+    color:deeppink;
+}
+SectionTitle {
+    padding: 1 2;
+    background: $boost;
+    text-align: center;
+    text-style: bold;
+    color:blueviolet;
+}
+
+TextLog {
+    background: $surface;
+    color: $text;
+    height: 100vh;
+    dock: bottom;
+    layer: notes;
+    border-top: hkey $primary;
+    offset-y: 0;
+    transition: offset 400ms in_out_cubic;
+    padding: 0 1 1 1;
+}
+
+
+TextLog:focus {
+    offset: 0 0 !important;
+}
+
+TextLog.-hidden {
+    offset-y: 100%;
+}
+
+
+
+Screen {
+    layers: base overlay notes notifications;
+    overflow: hidden;
+}
+
+
+Notification {
+    dock: bottom;
+    layer: notification;
+    width: auto;
+    margin: 2 4;
+    padding: 1 2;
+    background: $background;
+    color: $text;
+    height: auto;
+
+}

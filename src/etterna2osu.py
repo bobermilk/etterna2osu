@@ -8,7 +8,7 @@ from PIL import Image
 from math import floor, ceil
 from sys import platform, exit
 
-APP_VERSION=1
+APP_VERSION=2
 TARGET_DIR="etterna2osu_song_packs"
 
 offset=-26

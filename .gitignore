@@ -5,3 +5,4 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 /src/etterna2osu_song_packs/
+/src/__pycache__/
