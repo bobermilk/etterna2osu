@@ -3,6 +3,7 @@ import zipfile
 import shutil
 import re
 import subprocess
+import multiprocessing
 import urllib.request, json 
 from PIL import Image
 from math import floor, ceil
@@ -439,17 +440,26 @@ def main():
                                     elif not skip:
                                         edit.write(f[j])
 
-                    # get range not exceeding msd
-                    # call uprate on range
                     # double checking
                     if os.isfile(audio_filename):
-                        for _rate in range(rates[0]*divisor, rates[1]*divisor+1) :
-                            rate=_rate/divisor
-                    print(chart+" "*(TERMINAL_WIDTH()-len(chart)-len(msg)-1)+bcolors.OKGREEN+msg+bcolors.ENDC)
+                        try:
+                            with multiprocessing.Pool(processes=4) as pool:
+                                RateChanger=lambda rate, osu, diff_name: subprocess.run(["..\\..\\..\\tools\\win32\\RateChanger.exe", os.path.join(os.path.pardir(), osu), osu, os.path.join(os.path.pardir(), i), keep_pitch, rate, msd[rate][diff_name]])
+                                rates=msd.keys()
+                                tasks=[]
+                                for rate in rates:
+                                    for osu in osues:
+                                        diff_name=re.findall("\[(.*?)\]",osu)[-1].split("(")[0]
+                                        tasks.append((rate, osu, diff_name))
+                                pool.starmap(RateChanger, tasks)
+                        except Exception as e:
+                            stop=2
+                            print(e)
                 except:
                     stop=1
                 if stop==0:
                     msg="[ Good ✓ ]"
+                    print(chart+" "*(TERMINAL_WIDTH()-len(chart)-len(msg)-1)+bcolors.OKGREEN+msg+bcolors.ENDC)
                 else:
                     if stop==1:
                         stop_err="[ Fail ✗ ]"

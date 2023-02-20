@@ -7,25 +7,15 @@ class Program {
 
     static bool success = true;
 
-    // osu file dir, osu file name, audio file path, keep_pitch, min_rate, max_rate, half_increments
+    // osu file dir, osu file name, audio file path, keep_pitch, rate, msd
     static void Main(string[] args) {
         bool keepPitch = bool.Parse(args[3]);
-        bool halfIncrements= bool.Parse(args[6]);
-        double minRate = double.Parse(args[4], CultureInfo.InvariantCulture);
-        double maxRate = double.Parse(args[5], CultureInfo.InvariantCulture);
-
-        double rate = minRate;
-        while (rate <= maxRate) {
-            OsuFileConverter converter = new OsuFileConverter();
-            ConvertAudio(args[2], rate, keepPitch); //audiopath, rate
-            converter.Start(args[0], args[1], rate, true);  //last arg is true since we are converting audio files
-            if (halfIncrements) {
-                rate += 0.05;
-            }
-            else {
-                rate += 0.1;
-            }
-        }
+        double rate = double.Parse(args[4], CultureInfo.InvariantCulture);
+        double msd = Math.Round(double.Parse(args[5], CultureInfo.InvariantCulture), 1);
+        
+        OsuFileConverter converter = new OsuFileConverter();
+        ConvertAudio(args[2], rate, keepPitch); //audiopath, rate
+        converter.Start(args[0], args[1], rate, true, msd);  //last arg is true since we are converting audio files
     }
 
     private static void ConvertAudio(string audioFilePath, double rate, bool keepPitch) {

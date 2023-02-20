@@ -273,7 +273,6 @@ namespace RateChanger
                 if (outFile != null) outFile.Dispose();
 
                 Console.Error.WriteLine("Done!");
-                Console.ReadKey();
             }
             catch (Exception e)
             {
