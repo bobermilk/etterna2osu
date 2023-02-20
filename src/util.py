@@ -84,11 +84,7 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
     if not os.path.isdir(TARGET_DIR):
         os.mkdir(TARGET_DIR)
         
-    print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-27)/2)+f"etterna2osu v{APP_VERSION} by bobermilk"+bcolors.ENDC)
-    print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-92)/2)+"DM milk#6867 on discord for any queries after reading FAQs at https://milkies.ml/etterna2osu"+bcolors.ENDC)
-    print(bcolors.OKBLUE+" "*int((TERMINAL_WIDTH()-88)/2)+"Thank you demi, kangalio, guil, marc, chxu, senya, gonx, messica for helping me make this"+bcolors.ENDC)
-    print()
-    print(bcolors.FAIL+" "*int((TERMINAL_WIDTH()-96)/2)+"bobermilk is not liable for any distribution of the converted packs, only upload your own charts"+bcolors.ENDC)
+    print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-48)/2)+"Configuration successful. Conversion will begin."+bcolors.ENDC)
     print()
     print(bcolors.HEADER+"You can obtain etterna packs zips at https://etternaonline.com/packs"+bcolors.ENDC)
     path = os.path.realpath(TARGET_DIR)
