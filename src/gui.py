@@ -18,10 +18,15 @@ from textual.widgets import (
     TextLog,
 )
 
+def clear_note(self) -> None:
+    self.query_one(TextLog).clear()
+
 def add_note(self, renderable: RenderableType) -> None:
     self.query_one(TextLog).write(renderable)
 
 def notify(self, message):
+    message=message.strip()
+    add_note(self.app, message+"\n")
     self.app.bell()
     message=Text.assemble(message)
     self.screen.mount(Notification(message))
@@ -57,18 +62,17 @@ class Welcome(Container):
 
 class ChartAttributes(Container):
     def compose(self) -> ComposeResult:
-        notify(self, "pizza\nhut\nis\ncool")
         yield Container(
             Horizontal(
             Vertical(
                 SectionTitle("Map Attributes"),
                 Horizontal(
                     Vertical(
-                        Labels("   OD", classes="label"),
+                        Labels("   OD (1 to 10)", classes="label"),
                         Input(placeholder="8"),
                         classes="column"),
                     Vertical(
-                        Labels("   HP", classes="label"),
+                        Labels("   HP (1 to 10)", classes="label"),
                         Input(placeholder="7"),
                         classes="column"),
                 ),
@@ -89,7 +93,7 @@ class ChartAttributes(Container):
                 classes="column",
             ),
             Vertical(
-                SectionTitle("Map Attributes"),
+                SectionTitle("Msd restricted rates"),
                 Horizontal(
                     Vertical(
                         Labels("   Lowest rate (0.8 min)", classes="label"),
@@ -101,7 +105,7 @@ class ChartAttributes(Container):
                         classes="column"),
                 ),
                 Vertical(
-                    Labels("   Maximum msd to restrict further uprates", classes="label"),
+                    Labels("   Maximum msd to restrict further uprates (1MSD to 100MSD)", classes="label"),
                     Input(placeholder="Example: 28.42"),
                     classes="column"),
                 Horizontal(
@@ -122,24 +126,100 @@ class ChartAttributes(Container):
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        inputs=self.query(Input)
+        clear_note(self.app)
+        log_text=""
+        notification_text="Configuration Errors:"
+        fail=False
+        inputs=[x.value for x in self.query(Input)]
+
         try:
             OD=int(inputs[0])
         except:
-            notify(self, "Invalid HP, defaulting to HP 7")
-        HP=inputs[1]
-        creator=inputs[2]
-        lowest_rate=inputs[3]
-        higest_rate=inputs[4]
-        min_msd=inputs[5]
+            log_text+="\n"
+            log_text+="Warning: Invalid OD, defaulting to OD 8"
+            OD=8
+        if OD not in range(1,11):
+            notification_text+="\n"
+            notification_text+="    - OD out of bounds, please retry with a value within 1-10"
+            fail=True
 
-        buttons=self.query(Switch)
+        try:
+            HP=int(inputs[1])
+        except:
+            log_text+="\n"
+            log_text+="Warning: Invalid HP, defaulting to HP 7"
+            HP=7
+        if HP not in range(1,11):
+            notification_text+="\n"
+            notification_text+="    - HP out of bounds, please retry with a value within 1-10"
+            fail=True
+
+        creator=inputs[2]
+        if not creator:
+            log_text+="\n"
+            log_text+="Invalid creator, defaulting to bobermilk"
+            creator="bobermilk"
+
+        try:
+            lowest_rate=float(inputs[3])
+        except:
+            log_text+="\n"
+            log_text+="Warning: Invalid lowest rate, defaulting to 1.0"
+            lowest_rate=1.0
+        if lowest_rate>1 or lowest_rate<0.8:
+            notification_text+="\n"
+            notification_text+="    - lowest rate out of bounds, please retry with a value in range 0.8 to 1.0"
+            fail=True
+
+        try:
+            highest_rate=float(inputs[4])
+        except:
+            log_text+="\n"
+            log_text+="Warning: Invalid highest rate, defaulting to 1.0"
+            highest_rate=1.0
+        if highest_rate<1.0 or highest_rate>1.45:
+            notification_text+="\n"
+            notification_text+="    - lowest rate out of bounds, please retry with a value in range 1.0 and 1.45"
+            fail=True
+
+        try:
+            max_msd=float(inputs[5])
+        except:
+            log_text+="\n"
+            log_text+="Warning: Invalid maximum msd, no msd limit will be set on uprates"
+            max_msd=10000.0
+        if max_msd<1.0 or max_msd>100.0:
+            notification_text+="\n"
+            notification_text+="    - lowest rate out of bounds, please retry with a value in range 1.0 and 100.0"
+            fail=True
+
+        buttons=[x.value for x in self.query(Switch)]
         remove_ln=buttons[0]
+        if remove_ln:
+            log_text+="\n"
+            log_text+="Warning: Short LNs will be changed to normal note"
+        else:
+            log_text+="\n"
+            log_text+="Warning: Short LNs will remain"
+
         uprate_half_increments=buttons[1]
+        if uprate_half_increments:
+            log_text+="\n"
+            log_text+="Warning: 0.05 uprate increments will double the number of converted files!"
         show_skillset_msd=buttons[2]
         keep_pitch=buttons[3]
+        if not keep_pitch:
+            log_text+="\n"
+            log_text+="Warning: Disabling keep audio pitch creates nightcore"
 
-        self.remove()
+        add_note(self.app, log_text +"\n")
+        notify(self, notification_text)
+        if not fail:
+            if show_skillset_msd:
+                body.mount(skillset_msd)
+            else:
+                body.mount(conversion_progress)
+            self.remove()
 
 
 class SkillsetMsd(Container):
@@ -161,7 +241,7 @@ class etterna2osu(App):
     CSS_PATH = "gui.css"
     BINDINGS = [("ctrl+d", "toggle_dark", "Toggle dark mode"),
         ("ctrl+c", "app.quit", "Quit"),
-        ("f1", "app.toggle_class('TextLog', '-hidden')", "Notes"),
+        ("f1", "app.toggle_class('TextLog', '-hidden')", "Recent Logs"),
         ]
 
     def compose(self) -> ComposeResult:
