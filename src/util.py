@@ -128,8 +128,8 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
         charts=os.listdir(".")
         print()
         print(bcolors.HEADER+bcolors.UNDERLINE+"Song (charter)"+bcolors.ENDC+" "*(TERMINAL_WIDTH()-21)+bcolors.HEADER+bcolors.UNDERLINE+"Status"+bcolors.ENDC+" ")
-        stop=0
         for i, chart in enumerate(charts, 1):
+            stop=0
             msd={}
             msd[1.0]={}
             sm=[f for f in os.listdir(chart) if f.endswith(".sm")]
@@ -214,7 +214,8 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
                                             edit.write("Version: "+diff_name+ " 1.0x - "+str(skillset_msd[0]) +" MSD " + skillset_msd_text)
                                             edit.write("\n")
                                         else:
-                                            edit.write(f[j].split("(")[0]+" 1.0x - ??? MSD ")
+                                            edit.write(f[j].split("(")[0]+" 1.0x - ??? MSD")
+                                            edit.write("\n")
 
                                     elif "AudioFilename:" in f[j]:
                                         audio=re.split("[:]", f[j])[-1].strip()
@@ -223,6 +224,12 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
                                         # is there a entry
                                         if "." in audio:
                                             if not os.path.isfile(f"..\\{audio_filename}"):
+                                                if not os.path.isfile(audio):
+                                                    audios=[x for x in os.listdir() if x.endswith(('.mp3','.mp4','.ogg','.wav'))]
+                                                    if len(audios)>0:
+                                                        audio=audios[0]
+                                                    else:
+                                                        stop=1
                                                 if platform == "win32":
                                                     sample_rate=int(subprocess.run(["..\\..\\..\\tools\\win32\\sox\\sox.exe", "--i", "-r", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout)
                                                     average_bitrate=subprocess.run(["..\\..\\..\\tools\\win32\\sox\\sox.exe", "--i", "-B", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip() 
@@ -408,21 +415,25 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
                         except Exception as e:
                             stop=2
                 except Exception as e:
-                    import sys
-                    exc_type, exc_obj, exc_tb = sys.exc_info()
-                    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                    print(exc_type, fname, exc_tb.tb_lineno)
+                    # import sys
+                    # exc_type, exc_obj, exc_tb = sys.exc_info()
+                    # fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                    # print(exc_type, fname, exc_tb.tb_lineno)
                     stop=1
                 if stop==0:
                     msg="[ Good ✓ ]"
                     print(chart+" "*(TERMINAL_WIDTH()-len(chart)-len(msg)-1)+bcolors.OKGREEN+msg+bcolors.ENDC)
                 else:
                     if stop==1:
-                        stop_err="[ Fail ✗ ]"
+                        stop_err="[ Chart Fail ✗ ]"
                         stop_err_color=bcolors.FAIL
                     else:
                         stop_err="[ Uprate Fail ✗ ]"
                         stop_err_color=bcolors.WARNING
+                        audios=[x for x in os.listdir("..") if x.endswith(('.wav'))]
+                        for audio in audios:
+                            if audio[0] == str(i):
+                                os.remove(f"..\\{audio}")
                     failed.append((chart, stop_err))
                     print(chart+"  "+bcolors.WARNING+"-"*(TERMINAL_WIDTH()-len(chart)-(len(stop_err)+6))+">  "+stop_err_color+stop_err+bcolors.ENDC)
                 os.chdir("..")
@@ -445,7 +456,7 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
         print()
         print("Charts that failed to convert:")
         for i, chart in enumerate(failed,1):
-            print("    "+f"{i}. {chart}")
+            print("    "+f"{i}. {chart[0]} - {chart[1]}")
     print()
     print(f"Beatmaps files generated can be found in the {TARGET_DIR} folder")
     print(bcolors.OKGREEN+"All done! The converted files are all correctly timed :3"+bcolors.ENDC)
