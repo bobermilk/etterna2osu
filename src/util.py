@@ -211,7 +211,10 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
                                                     skillset_msd_text+="|"
                                             skillset_msd_text=skillset_msd_text[:-1]
                                             skillset_msd_text+=")"
-                                            edit.write("Version: "+diff_name+ " 1.0x - "+str(skillset_msd[0]) +" MSD " + skillset_msd_text)
+                                            if skillset_msd_commit:
+                                                edit.write("Version: "+diff_name+ " 1.0x - "+str(skillset_msd[0]) +" MSD " + skillset_msd_text)
+                                            else:
+                                                edit.write("Version: "+diff_name+ " 1.0x - "+str(skillset_msd[0]) +" MSD")
                                             edit.write("\n")
                                         else:
                                             edit.write(f[j].split("(")[0]+" 1.0x - ??? MSD")
