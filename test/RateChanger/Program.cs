@@ -44,11 +44,9 @@ class Program {
     }
 
     private static void ConvertAudio(string audioFilePath, double rate, bool keepPitch) {
-        // Convert .mp3 file to .wav
-        Codec.MP3ToWave(audioFilePath + ".mp3", audioFilePath + ".wav");
-
+        File.Copy(audioFilePath+".wav", audioFilePath + rate*100 + "uwu" + ".wav");
         // Change either the tempo or the rate of the .wav
-        string[] args = new string[] { audioFilePath + ".wav", audioFilePath + rate * 100 + ".wav" };
+        string[] args = new string[] { audioFilePath + rate*100 + "uwu" + ".wav", audioFilePath + rate * 100 + ".wav" };
         float rateDeltaInProcent = ((float)rate * 100) - 100;
         AudioStrech.Start(args, rateDeltaInProcent, keepPitch);
 
@@ -61,16 +59,19 @@ class Program {
         }
 
         // Remove the .wav files
-        File.Delete(audioFilePath + ".wav");
         File.Delete(audioFilePath + rate * 100 + ".wav");
+        File.Delete(audioFilePath + rate * 100 + "uwu" + ".wav");
     }
     
     private static void ConvertAudioRates(string audioFilePath, List<double> rates, bool keepPitch) {
+        // Convert .mp3 file to .wav
+        Codec.MP3ToWave(audioFilePath + ".mp3", audioFilePath + ".wav");
         List<Task> tasks = new List<Task>();
         foreach (double rate in rates) {
             var t = Task.Run(() => ConvertAudio(audioFilePath, rate, keepPitch));
             tasks.Add(t);
         }
         Task.WaitAll(tasks.ToArray());
+        File.Delete(audioFilePath + ".wav");
     }
 }
