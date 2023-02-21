@@ -101,14 +101,14 @@ class ChartAttributes(Container):
                     classes="container",
                 ),
                 Horizontal(
-                    Static("   Uprate by 0.05 instead of 0.1\n   (warning: this is 2x spam)                  ", classes="btnLabel"),
+                    Static("   Uprate by 0.05 instead of 0.1\n   (warning: no. of maps gets doubled)         ", classes="btnLabel"),
                     Switch(value=False),
                     classes="container",
                 ),
                 classes="column",
             ),
             Vertical(
-                SectionTitle("Msd restricted rates"),
+                SectionTitle("Map rates"),
                 Horizontal(
                     Vertical(
                         Labels("   Lowest rate (0.8 min)", classes="label"),
