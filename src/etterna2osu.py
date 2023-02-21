@@ -101,7 +101,7 @@ class ChartAttributes(Container):
                     classes="container",
                 ),
                 Horizontal(
-                    Static("   Uprate by 0.05 instead of 0.01\n   (warning: this is 2x spam)                  ", classes="btnLabel"),
+                    Static("   Uprate by 0.05 instead of 0.1\n   (warning: this is 2x spam)                  ", classes="btnLabel"),
                     Switch(value=False),
                     classes="container",
                 ),

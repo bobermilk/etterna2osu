@@ -179,29 +179,39 @@ namespace RateChanger
                                 string last_bleh=bleh[bleh.Length-1];
                                 if (last_bleh.Contains("(")) {
                                     string newSkillsetMsd = "(";
+                                    bool diff_name_skillset_msd=false;
                                     if(last_bleh.Contains("Str")) {
+                                        diff_name_skillset_msd = true;
                                         newSkillsetMsd += "Str:" + msd_stream+"|";
                                     }
                                     if(last_bleh.Contains("JS")) {
+                                        diff_name_skillset_msd = true;
                                         newSkillsetMsd += "JS:" + msd_jumpstream+"|";
                                     }
                                     if(last_bleh.Contains("HS")) {
+                                        diff_name_skillset_msd = true;
                                         newSkillsetMsd += "HS:" + msd_handstream+"|";
                                     }
                                     if(last_bleh.Contains("Sta")) {
+                                        diff_name_skillset_msd = true;
                                         newSkillsetMsd += "Sta:" + msd_stamina+"|";
                                     }
                                     if(last_bleh.Contains("JaSp")) {
+                                        diff_name_skillset_msd = true;
                                         newSkillsetMsd += "JaSp:" + msd_jackspeed+"|";
                                     }
                                     if(last_bleh.Contains("CJ")) {
+                                        diff_name_skillset_msd = true;
                                         newSkillsetMsd += "CJ:" + msd_chordjack+"|";
                                     }
                                     if(last_bleh.Contains("Tech")) {
+                                        diff_name_skillset_msd = true;
                                         newSkillsetMsd += "Tech:" + msd_tech+"|";
                                     }
                                     newSkillsetMsd=newSkillsetMsd.Substring(0, newSkillsetMsd.Length - 1);
-                                    newSkillsetMsd += ")";
+                                    if (diff_name_skillset_msd){
+                                        newSkillsetMsd += ")";
+                                    }
                                     bleh[bleh.Length - 1] = newSkillsetMsd;
                                 }
                                 newLine = String.Join(" ", bleh.Where(s => !String.IsNullOrEmpty(s)));
