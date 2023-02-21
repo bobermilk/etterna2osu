@@ -131,6 +131,7 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
         stop=0
         for i, chart in enumerate(charts, 1):
             msd={}
+            msd[1.0]={}
             sm=[f for f in os.listdir(chart) if f.endswith(".sm")]
             # is there .sm?
             if len(sm)>0:
@@ -150,6 +151,8 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
                     out=subprocess.run(["..\\..\\..\\tools\\win32\\minacalc.exe", sm, str(rate), str(score_goal)], stdout=subprocess.PIPE).stdout.splitlines()
                     for line in out:
                         line=line.decode()
+                        if "skipping" in line:
+                            break
                         if "|" in line:
                             line=line.split("|")
                             skillset_msd=[round(x, 1) for x in list(map(float,line[1:]))]
@@ -211,7 +214,7 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
                                             edit.write("Version: "+diff_name+ " 1.0x - "+str(skillset_msd[0]) +" MSD " + skillset_msd_text)
                                             edit.write("\n")
                                         else:
-                                            edit.write(f[j])
+                                            edit.write(f[j].split("(")[0]+" 1.0x - ??? MSD ")
 
                                     elif "AudioFilename:" in f[j]:
                                         audio=re.split("[:]", f[j])[-1].strip()
