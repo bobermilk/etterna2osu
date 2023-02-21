@@ -11,6 +11,7 @@ from sys import platform, exit
 APP_VERSION=2
 TARGET_DIR="etterna2osu_song_packs"
 
+no_sm_detected=True
 failed=[]
 diff_name_skillset_msd_titles=("Str", "JS", "HS", "Sta", "JaSp", "CJ", "Tech")
 
@@ -133,6 +134,8 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
             sm=[f for f in os.listdir(chart) if f.endswith(".sm")]
             # is there .sm?
             if len(sm)>0:
+                global no_sm_detected
+                no_sm_detected=False
                 sm=sm[0]
                 os.chdir(chart)
                 if uprate_half_increments:
@@ -423,10 +426,14 @@ def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, upra
         # wrap things up and move them to output
         output=[f for f in os.listdir(".") if os.path.isfile(f)]
         print()
-        print(bcolors.OKCYAN+f"Writing data to {packfolder}.osz"+bcolors.ENDC)
-        with zipfile.ZipFile(f'..\{packfolder}.osz', 'w') as osz:        
-            for file in output:
-                osz.write(file, compress_type=zipfile.ZIP_DEFLATED)
+        if not no_sm_detected:
+            print(bcolors.OKCYAN+f"Writing data to {packfolder}.osz"+bcolors.ENDC)
+            with zipfile.ZipFile(f'..\{packfolder}.osz', 'w') as osz:        
+                for file in output:
+                    osz.write(file, compress_type=zipfile.ZIP_DEFLATED)
+        else:
+            print(bcolors.FAIL+f"There are no charts to convert!"+bcolors.ENDC)
+        no_sm_detected=True
 
         # move on to the next pack
         os.chdir("..")
