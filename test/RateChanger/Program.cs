@@ -39,31 +39,38 @@ class Program {
             for (int i = 0; i < args.Length - 3; i++) {
                 rates.Add(double.Parse(args[i+3], CultureInfo.InvariantCulture));
             }
-            ConvertAudio(args[1], rates, keepPitch); // audiopath, rate
+            ConvertAudioRates(args[1], rates, keepPitch); // audiopath, rate
         }
     }
 
-    private static void ConvertAudio(string audioFilePath, List<double> rates, bool keepPitch) {
-        foreach (double rate in rates) {
-            // Convert .mp3 file to .wav
-            Codec.MP3ToWave(audioFilePath + ".mp3", audioFilePath + ".wav");
+    private static void ConvertAudio(string audioFilePath, double rate, bool keepPitch) {
+        // Convert .mp3 file to .wav
+        Codec.MP3ToWave(audioFilePath + ".mp3", audioFilePath + ".wav");
 
-            // Change either the tempo or the rate of the .wav
-            string[] args = new string[] { audioFilePath + ".wav", audioFilePath + rate * 100 + ".wav" };
-            float rateDeltaInProcent = ((float)rate * 100) - 100;
-            AudioStrech.Start(args, rateDeltaInProcent, keepPitch);
+        // Change either the tempo or the rate of the .wav
+        string[] args = new string[] { audioFilePath + ".wav", audioFilePath + rate * 100 + ".wav" };
+        float rateDeltaInProcent = ((float)rate * 100) - 100;
+        AudioStrech.Start(args, rateDeltaInProcent, keepPitch);
 
-            // Convert .wav file to .mp3
-            try {
-                Codec.WaveToMP3(audioFilePath + rate * 100 + ".wav", audioFilePath + "-" + rate * 100 + ".mp3");
-            }
-            catch (Exception e) {
-                success = false;
-            }
-
-            // Remove the .wav files
-            File.Delete(audioFilePath + ".wav");
-            File.Delete(audioFilePath + rate * 100 + ".wav");
+        // Convert .wav file to .mp3
+        try {
+            Codec.WaveToMP3(audioFilePath + rate * 100 + ".wav", audioFilePath + "-" + rate * 100 + ".mp3");
         }
+        catch (Exception e) {
+            success = false;
+        }
+
+        // Remove the .wav files
+        File.Delete(audioFilePath + ".wav");
+        File.Delete(audioFilePath + rate * 100 + ".wav");
+    }
+    
+    private static void ConvertAudioRates(string audioFilePath, List<double> rates, bool keepPitch) {
+        List<Task> tasks = new List<Task>();
+        foreach (double rate in rates) {
+            var t = Task.Run(() => ConvertAudio(audioFilePath, rate, keepPitch));
+            tasks.Add(t);
+        }
+        Task.WaitAll(tasks.ToArray());
     }
 }

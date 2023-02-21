@@ -51,13 +51,6 @@ class Body(Container):
 
 class Welcome(Container):
     def compose(self) -> ComposeResult:
-    # print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-27)/2)+f"etterna2osu v{APP_VERSION} by bobermilk"+bcolors.ENDC)
-    # print(bcolors.HEADER+" "*int((TERMINAL_WIDTH()-92)/2)+"DM milk#6867 on discord for any queries after reading FAQs at https://milkies.ml/etterna2osu"+bcolors.ENDC)
-    # print(bcolors.OKBLUE+" "*int((TERMINAL_WIDTH()-88)/2)+"Thank you demi, kangalio, guil, marc, chxu, senya, gonx, messica for helping me make this"+bcolors.ENDC)
-    # print()
-    # print(bcolors.FAIL+" "*int((TERMINAL_WIDTH()-96)/2)+"bobermilk is not liable for any distribution of the converted packs, only upload your own charts"+bcolors.ENDC)
-    # print()
-    # print(bcolors.HEADER+"You can obtain etterna packs zips at https://etternaonline.com/packs"+bcolors.ENDC)
         yield Labels(Markdown(f"# etterna2osu v{util.APP_VERSION} by bobermilk\n"+
                               "## Thank you demi, kangalio, guil, marc, chxu, senya, gonx, messica for helping me make this\n"+
                               "### DM milk#6867 on discord for any queries after reading FAQs at https://milkies.ml/etterna2osu\n"+
