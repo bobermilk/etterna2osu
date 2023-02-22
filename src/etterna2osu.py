@@ -66,7 +66,8 @@ HP=7
 offset=-26
 creator="bobermilk"
 additional_tags=""
-rates=[0.9, 1.4, 26.5] # minimum_rate, maximum_rate, max_msd
+rates=[0,0,0] # initial, step size, number
+msd_bounds=[0,0] #min_msd, max_msd
 remove_ln=False
 diff_name_skillset_msd=[False]*7 # Str, JS, HS, Stamina, JaSp, CJ, Tech
 keep_pitch=True
@@ -206,7 +207,7 @@ class ChartAttributes(Container):
             creator="bobermilk"
 
         try:
-            additional_tags=str(inputs[3]).strip()
+            additional_tags=str(inputs[4]).strip()
         except:
             log_text+="\n"
             log_text+="Invalid additional tags, no additional tags will be added"
@@ -214,41 +215,90 @@ class ChartAttributes(Container):
             log_text+="\n"
             log_text+="No additional tags specified, no additional tags will be added"
 
+        unspecified_rate_initial=False
+        unspecified_rate_increment=False
         try:
-            lowest_rate=float(inputs[5])
+            initial_rate=float(inputs[5])
         except:
+            if not inputs[5].strip():
+                unspecified_rate_increment=True
             log_text+="\n"
-            log_text+="Warning: Invalid lowest rate, defaulting to 1.0"
-            lowest_rate=1.0
-        if lowest_rate>1 or lowest_rate<0.8:
+            log_text+="Warning: Invalid initial rate rate, defaulting to 1.0"
+            initial_rate=1.0
+        if initial_rate<0.8:
             notification_text+="\n"
-            notification_text+="    - Lowest rate out of bounds, please retry with a value in range 0.8 to 1.0"
+            notification_text+="    - Initial rate out of bounds, please retry with a value in range 0.8 to 1.0"
             fail=True
-        rates[0]=lowest_rate
+        rates[0]=initial_rate
 
         try:
-            highest_rate=float(inputs[6])
+            rate_increment=float(inputs[6])
         except:
+            if not inputs[6].strip():
+                unspecified_rate_initial=True
             log_text+="\n"
-            log_text+="Warning: Invalid highest rate, defaulting to 1.0"
-            highest_rate=1.0
-        if highest_rate<1.0 or highest_rate>1.45:
+            log_text+="Warning: Invalid rate increment, defaulting to 0.1"
+            rate_increment=0.1
+        if rate_increment<0.05 or rate_increment>0.1:
             notification_text+="\n"
-            notification_text+="    - Highest rate out of bounds, please retry with a value in range 1.0 and 1.45"
+            notification_text+="    - Rate increment out of bounds, please retry with a value in range 0.05 and 0.1"
             fail=True
-        rates[1]=highest_rate
+        rates[1]=rate_increment
 
         try:
-            max_msd=float(inputs[7])
+            rate_cnt=int(inputs[7])
         except:
             log_text+="\n"
-            log_text+="Warning: Invalid maximum msd, no msd limit will be set on uprates"
-            max_msd=100.0
+            if not inputs[7].strip() and unspecified_rate_initial and unspecified_rate_increment:
+                log_text+="Warning: no uprate options specified, not uprating anything."
+                rate_cnt=1
+            else:
+                notification_text+="\n"
+                notification_text+="    - Rate count has to be a integer greater than 0"
+                fail=True
+        if not rate_cnt>0:
+            notification_text+="\n"
+            notification_text+="    - Rate count has to be a integer greater than 0"
+            fail=True
+        rates[2]=rate_cnt
+
+        unspecified_min_msd=False
+        try:
+            min_msd=float(inputs[8])
+        except:
+            if not inputs[8].strip():
+                unspecified_min_msd=True
+            log_text+="\n"
+            log_text+="Warning: Invalid minimum msd, defaulting to no minimum msd limits"
+            min_msd=-1.0
+        if min_msd<1.0 or min_msd>100.0:
+            notification_text+="\n"
+            notification_text+="    - Minimum msd out of bounds, please retry with a value in range 1.0 and 100.0"
+            fail=True
+        msd_bounds[0]=min_msd
+
+        try:
+            max_msd=float(inputs[9])
+        except:
+            log_text+="\n"
+            if not inputs[9].strip() and unspecified_min_msd:
+                log_text+="Warning: no msd ranges specified, no msd bounds for uprates to be generated will be imposed"
+                max_msd=-1
+            else:
+                notification_text+="\n"
+                notification_text+="    - Maximum msd out of bounds, please retry with a value in range 1.0 and 100.0"
+                fail=True
+
         if max_msd<1.0 or max_msd>100.0:
             notification_text+="\n"
-            notification_text+="    - minimum msd out of bounds, please retry with a value in range 1.0 and 100.0"
+            notification_text+="    - Maximum msd out of bounds, please retry with a value in range 1.0 and 100.0"
             fail=True
         rates[2]=max_msd
+
+        if min_msd>max_msd:
+            notification_text+="\n"
+            notification_text+="    - Minimum msd cannot be greater than maximum msd!"
+            fail=True
 
         buttons=[x.value for x in self.query(Switch)]
         remove_ln=buttons[0]
@@ -358,7 +408,7 @@ if __name__ == "__main__":
     tui_result=app.run()
     try:
         if tui_result:
-            util.main(OD, HP, offset, creator, additional_tags, rates, remove_ln, diff_name_skillset_msd, keep_pitch)
+            util.main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln, diff_name_skillset_msd, keep_pitch)
     except:
         pass
 
