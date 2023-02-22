@@ -302,7 +302,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                         edit.write("AudioFilename: "+audio_filename)
                                         edit.write("\n")
                                     elif "Tags:" in f[j]:
-                                        tags=f"Tags: etterna etterna2osu etterna2osu_v{APP_VERSION} {additional_tags}"
+                                        tags=f"Tags: etterna etterna2osu etterna2osu_v{APP_VERSION} minacalc_v{calc_version} {additional_tags}"
                                         if remove_ln:
                                             tags+=" no_shlongs"
                                         tags+="\n"
