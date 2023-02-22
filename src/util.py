@@ -180,8 +180,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                             line=line.split("|")
                             skillset_msd=[round(x, 1) for x in list(map(float,line[1:]))]
                             name=line[0].strip()
-                            #todo force 1.0
-                            if (msd_bounds[0]!= 1.0 and msd_bounds[0]<=skillset_msd[0]) or (msd_bounds[1]!=-1.0 and msd_bounds[0]<=msd_bounds[1]) or rate==1.0:
+                            if ((msd_bounds[0]!=-1.0 and msd_bounds[0]>=skillset_msd[0]) or msd_bounds[0]==-1) and ((msd_bounds[1]!=-1.0 and skillset_msd[0]<=msd_bounds[1]) or msd_bounds[1]==-1) or rate==1.0:
                                 diff_names[name]=skillset_msd
                     if len(diff_names)>0:
                         msd[rate]=diff_names
