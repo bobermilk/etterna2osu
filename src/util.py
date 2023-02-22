@@ -29,6 +29,10 @@ class bcolors:
 def TERMINAL_WIDTH():
     return os.get_terminal_size().columns
 
+def calc_version():
+    out=subprocess.run(["tools\\win32\\minacalc.exe"], stdout=subprocess.PIPE).stdout
+    return out.decode()
+
 def rateChangeMap(rate, osu, s0, s1, s2, s3, s4, s5, s6, s7):
     subprocess.run(["..\\..\\..\\tools\\win32\\RateChanger\\RateChanger.exe", 
                     str(False),

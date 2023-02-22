@@ -52,7 +52,7 @@ class Body(Container):
 class Welcome(Container):
     def compose(self) -> ComposeResult:
         yield Labels(Markdown(f"# etterna2osu v{util.APP_VERSION} by bobermilk\n"+
-                              "## Thank you demi, kangalio, guil, marc, chxu, senya, gonx, messica for helping me make this\n"+
+                              "## Thank you demi, kangalio, nakadashi, guil, marc, chxu, senya, gonx, messica for helping\n"+
                               "### DM milk#6867 on discord for any queries after reading FAQs at https://milkies.ml/etterna2osu\n"+
                               "### bobermilk is not liable for any distribution of the converted packs, only upload your own charts"), classes="chicken")
         yield Button("Start", variant="success")
@@ -108,7 +108,7 @@ class ChartAttributes(Container):
                 classes="column",
             ),
             Vertical(
-                SectionTitle("Map rates"),
+                SectionTitle(f"Map rates (calc v{util.calc_version()})"),
                 Horizontal(
                     Vertical(
                         Labels("   Lowest rate (0.8 min)", classes="label"),
@@ -129,7 +129,7 @@ class ChartAttributes(Container):
                     classes="container",
                 ),
                 Horizontal(
-                    Static("   Keep audio pitch in uprates                 ", classes="btnLabel"),
+                    Static("   Keep audio pitch for rates                  ", classes="btnLabel"),
                     Switch(value=True),
                     classes="container",
                 ),
