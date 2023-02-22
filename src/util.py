@@ -158,18 +158,14 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                 no_sm_detected=False
                 sm=sm[0]
                 os.chdir(chart)
-                divisor=1/rates[1]
                 score_goal=0.93
-                max_rate=rates[0]+rates[1]*rates[2]
-                max_rate=int(max_rate*divisor)+1
-                # msd{rate} - diff_names{name} - skillset_msd[]
-                if (rates[0]).is_integer():
-                    min_rate=int(rates[0]*divisor)
-                else:
-                    min_rate=int(rates[0]*divisor)+1
+                all_chart_rates=[rates[0]+rates[1]*x for x in range(0, rates[2])]
+                # we force 1.0x msd to be calculated
+                if 1.0 not in all_chart_rates:
+                    all_chart_rates.append(1.0)
 
-                for _rate in range(min_rate, max_rate):
-                    rate=round(_rate/divisor,2)
+                for _rate in all_chart_rates:
+                    rate=round(_rate,2)
                     diff_names={}
                     out=subprocess.run(["..\\..\\..\\tools\\win32\\minacalc.exe", sm, str(rate), str(score_goal)], stdout=subprocess.PIPE).stdout.splitlines()
                     for line in out:
@@ -180,14 +176,11 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                             line=line.split("|")
                             skillset_msd=[round(x, 1) for x in list(map(float,line[1:]))]
                             name=line[0].strip()
-                            if ((msd_bounds[0]!=-1.0 and msd_bounds[0]>=skillset_msd[0]) or msd_bounds[0]==-1) and ((msd_bounds[1]!=-1.0 and skillset_msd[0]<=msd_bounds[1]) or msd_bounds[1]==-1) or rate==1.0:
-                                diff_names[name]=skillset_msd
-                    if len(diff_names)>0:
-                        msd[rate]=diff_names
-                    elif not "1.0" in msd.keys():
-                        continue
-                    else:
-                        break
+                            # always write diff name for later
+                            diff_names[name]=skillset_msd
+                            # skip this rate or not
+                            if ((msd_bounds[0]!=-1.0 and msd_bounds[0]<=skillset_msd[0]) or msd_bounds[0]==-1) and ((msd_bounds[1]!=-1.0 and skillset_msd[0]<=msd_bounds[1]) or msd_bounds[1]==-1) or rate==1.0:
+                                msd[rate]=diff_names
 
                 if platform == "win32":
                     subprocess.run([f'..\\..\\..\\tools\\win32\\raindrop\\raindrop.exe', '-g', 'om', '-i', sm, '-o', '.'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -424,7 +417,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                             tasks_maps=[]
                             for rate in msd_rates:
                                 for osu in osues:
-                                    if rate != 1.0:
+                                    if rate != 1.0: # check if minacalc didn't fail and give us a empty dict of skillset_msd
                                         diff_name=re.findall("\[(.*?)\]",osu)[-1].split("(")[0]
                                         s=list(map(str, msd[rate][diff_name]))
                                         tasks_maps.append((rate, osu, s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]))

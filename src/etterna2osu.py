@@ -279,19 +279,15 @@ class ChartAttributes(Container):
             notification_text+="    - Rate count has to be a integer greater than 0"
             fail=True
 
-        unspecified_min_msd=False
-        unspecified_max_msd=False
         try:
             min_msd=float(inputs[8])
             msd_bounds[0]=min_msd
         except:
-            if not inputs[8].strip():
-                unspecified_min_msd=True
             log_text+="\n"
             log_text+="Warning: Invalid minimum msd, defaulting to no minimum msd limits"
             min_msd=-1.0
             msd_bounds[0]=min_msd
-        if not unspecified_min_msd and (min_msd<1.0 or min_msd>100.0):
+        if not min_msd==-1 and (min_msd<1.0 or min_msd>100.0):
             notification_text+="\n"
             notification_text+="    - Minimum msd out of bounds, please retry with a value in range 1.0 and 100.0"
             fail=True
@@ -301,24 +297,15 @@ class ChartAttributes(Container):
             msd_bounds[1]=max_msd
         except:
             log_text+="\n"
-            if not inputs[9].strip():
-                unspecified_max_msd=True
-                if unspecified_min_msd:
-                    log_text+="Warning: no msd ranges specified, defaulting to no msd bounds for uprates to be generated will be imposed"
-                    max_msd=-1.0
-                    msd_bounds[1]=max_msd
-            else:
-                max_msd=-1.0
-                notification_text+="\n"
-                notification_text+="    - Maximum msd out of bounds, please retry with a value in range 1.0 and 100.0"
-                fail=True
-
-        if not unspecified_max_msd and (max_msd<1.0 or max_msd>100.0):
+            log_text+="Warning: no msd ranges specified, defaulting to no msd bounds for uprates to be generated will be imposed"
+            max_msd=-1.0
+            msd_bounds[1]=max_msd
+        if not max_msd==-1 and (max_msd<1.0 or max_msd>100.0):
             notification_text+="\n"
             notification_text+="    - Maximum msd out of bounds, please retry with a value in range 1.0 and 100.0"
             fail=True
 
-        if not unspecified_min_msd and not unspecified_max_msd and min_msd>max_msd:
+        if not min_msd==-1 and not max_msd==-1 and min_msd>max_msd:
             notification_text+="\n"
             notification_text+="    - Minimum msd cannot be greater than maximum msd!"
             fail=True
