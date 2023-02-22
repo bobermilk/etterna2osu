@@ -3,7 +3,6 @@ import zipfile
 import shutil
 import re
 import subprocess
-import urllib.request, json 
 from PIL import Image
 from math import floor, ceil
 from sys import platform, exit
@@ -88,18 +87,6 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
         print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-73)/2)+"!!! You need 32-bit wine installed to run this program on your system !!!")
         print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-73)/2)+"!"*86+bcolors.ENDC)
         print("You need 32-bit wine installed to run this program on your system")
-
-    # check for updates
-    try:
-        with urllib.request.urlopen("https://api.github.com/repos/bobermilk/etterna2osu/releases") as url:
-            data = json.load(url)
-            if APP_VERSION < int(data[0]["name"][1:]):
-                print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-78)/2)+"!"*86+bcolors.ENDC)
-                print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-78)/2)+"!!! Update available at "+data[0]["html_url"]+" !!!")
-                print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-78)/2)+"!"*86+bcolors.ENDC)
-                print()
-    except:
-        pass
 
     if not os.path.isdir(TARGET_DIR):
         os.mkdir(TARGET_DIR)

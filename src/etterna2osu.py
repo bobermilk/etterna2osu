@@ -8,6 +8,8 @@ from rich.console import RenderableType
 from rich.markdown import Markdown
 from rich.text import Text
 
+import urllib.request, json 
+
 import util
 
 from textual.widgets import (
@@ -18,6 +20,11 @@ from textual.widgets import (
     Static,
     Switch,
 )
+
+# should we update the app
+is_update=False
+update_url=""
+changelog=""
 
 # def clear_note(self) -> None:
 #     self.query_one(TextLog).clear()
@@ -47,7 +54,42 @@ class SectionTitle(Labels):
 
 class Body(Container):
     def compose(self) -> ComposeResult:
-        yield welcome
+        global is_update
+        # check for updates
+        try:
+            with urllib.request.urlopen("https://api.github.com/repos/bobermilk/etterna2osu/releases") as url:
+                data = json.load(url)
+                if util.APP_VERSION < int(data[0]["name"][1:]):
+                    is_update=True
+                    global update_url, changelog
+                    update_url=data[0]["html_url"]
+                    changelog=data[0]["body"]
+                    yield Update()
+        except:
+            pass
+
+        if not is_update:
+            yield welcome
+
+class Update(Container):
+    def compose(self) -> ComposeResult:
+        yield Vertical(
+            Labels(Markdown(f"# New app version available on github\n"+changelog)),
+            Static(),
+            Static(),
+            Static(),
+            Button("Download from github", variant="default", id="github"),
+            Static(),
+            Button("Proceed without updating", variant="error")
+        )
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id=="github":
+            import webbrowser
+            webbrowser.open(update_url)
+        else:
+            body.mount(welcome)
+            self.remove()
 
 class Welcome(Container):
     def compose(self) -> ComposeResult:
