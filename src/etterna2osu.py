@@ -108,7 +108,7 @@ class ChartAttributes(Container):
                 classes="column",
             ),
             Vertical(
-                SectionTitle(f"Map rates (calc v{util.calc_version()})"),
+                SectionTitle(f"Map rates (calc v{util.calc_version})"),
                 Horizontal(
                     Vertical(
                         Labels("   Lowest rate (0.8 min)", classes="label"),
