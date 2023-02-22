@@ -59,16 +59,16 @@ def cleanup():
         shutil.rmtree(folder)
 
 def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln, diff_name_skillset_msd, keep_pitch):
-    print(OD)
-    print(HP)
-    print(offset)
-    print(creator)
-    print(additional_tags)
-    print(rates)
-    print(msd_bounds)
-    print(remove_ln)
-    print(diff_name_skillset_msd)
-    print(keep_pitch)
+    # print(OD)
+    # print(HP)
+    # print(offset)
+    # print(creator)
+    # print(additional_tags)
+    # print(rates)
+    # print(msd_bounds)
+    # print(remove_ln)
+    # print(diff_name_skillset_msd)
+    # print(keep_pitch)
 
     # fix win 10 colors
     if os.name == "nt":
@@ -158,13 +158,11 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                 no_sm_detected=False
                 sm=sm[0]
                 os.chdir(chart)
-                if uprate_half_increments:
-                    divisor=20
-                else:
-                    divisor=10
+                divisor=1/rates[1]
                 score_goal=0.93
+                max_rate=rates[0]+rates[1]*rates[2]
                 # msd{rate} - diff_names{name} - skillset_msd[]
-                for _rate in range(int(rates[0]*divisor), int(rates[1]*divisor)+1) :
+                for _rate in range(int(rates[0]*divisor), int(max_rate*divisor)+1) :
                     rate=_rate/divisor
                     diff_names={}
                     out=subprocess.run(["..\\..\\..\\tools\\win32\\minacalc.exe", sm, str(rate), str(score_goal)], stdout=subprocess.PIPE).stdout.splitlines()
@@ -176,7 +174,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                             line=line.split("|")
                             skillset_msd=[round(x, 1) for x in list(map(float,line[1:]))]
                             name=line[0].strip()
-                            if skillset_msd[0]<=rates[2] or rate==1.0:
+                            if msd_bounds[0]<=skillset_msd[0]<=msd_bounds[1] or rate==1.0:
                                 diff_names[name]=skillset_msd
                     if len(diff_names)>0:
                         msd[rate]=diff_names
@@ -305,7 +303,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                         edit.write("AudioFilename: "+audio_filename)
                                         edit.write("\n")
                                     elif "Tags:" in f[j]:
-                                        tags=f"Tags: etterna etterna2osu etterna2osu_v{APP_VERSION}"
+                                        tags=f"Tags: etterna etterna2osu etterna2osu_v{APP_VERSION} {additional_tags}"
                                         if remove_ln:
                                             tags+=" no_shlongs"
                                         tags+="\n"
