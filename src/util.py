@@ -58,7 +58,7 @@ def cleanup():
     for folder in target_folders:
         shutil.rmtree(folder)
 
-def main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, uprate_half_increments, keep_pitch):
+def main(OD, HP, offset, creator, additional_tags, rates, remove_ln, diff_name_skillset_msd, keep_pitch):
     # fix win 10 colors
     if os.name == "nt":
         import ctypes

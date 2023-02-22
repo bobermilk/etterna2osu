@@ -65,10 +65,10 @@ OD=8
 HP=7
 offset=-26
 creator="bobermilk"
+additional_tags=""
 rates=[0.9, 1.4, 26.5] # minimum_rate, maximum_rate, max_msd
 remove_ln=False
 diff_name_skillset_msd=[False]*7 # Str, JS, HS, Stamina, JaSp, CJ, Tech
-uprate_half_increments=False # DANGER: DOUBLE THE SPAM
 keep_pitch=True
 
 class ChartAttributes(Container):
@@ -77,52 +77,53 @@ class ChartAttributes(Container):
             Horizontal(
             Vertical(
                 SectionTitle("Map Attributes"),
+                Static(),
                 Horizontal(
                     Vertical(
-                        Labels("   OD (1 to 10)", classes="label"),
+                        Labels(" OD (1 to 10)", classes="label"),
                         Input(placeholder="8"),
-                        classes="column"),
+                        classes="column padwidthonly"),
                     Vertical(
-                        Labels("   HP (1 to 10)", classes="label"),
+                        Labels(" HP (1 to 10)", classes="label"),
                         Input(placeholder="7"),
-                        classes="column"),
+                        classes="column padwidthonly"),
                     Vertical(
-                        Labels("   Global offset", classes="label"),
+                        Labels(" Global offset", classes="label"),
                         Input(placeholder="Example: -10"),
-                        classes="column"),
+                        classes="column padwidthonly"),
                 ),
                 Vertical(
-                    Labels("   Creator Name", classes="label"),
+                    Labels(" Creator name", classes="label"),
                     Input(placeholder="Example: bobermilk"),
-                ),
+                    classes="padwidthonly"),
+                Vertical(
+                    Labels(" Additional search tags", classes="label"),
+                    Input(placeholder="Example: first_convert pizza lemon"),
+                    classes="padwidthonly"),
                 Horizontal(
                     Static("   Remove short lns                            ", classes="btnLabel"),
                     Switch(value=True),
-                    classes="container",
-                ),
-                Horizontal(
-                    Static("   Uprate by 0.05 instead of 0.1\n   (warning: no. of maps gets doubled)         ", classes="btnLabel"),
-                    Switch(value=False),
                     classes="container",
                 ),
                 classes="column",
             ),
             Vertical(
                 SectionTitle(f"Map rates (calc v{util.calc_version})"),
+                Static(),
                 Horizontal(
                     Vertical(
-                        Labels("   Lowest rate (0.8 min)", classes="label"),
+                        Labels(" Lowest rate (0.8 min)", classes="label"),
                         Input(placeholder="Example: 0.8"),
-                        classes="column"),
+                        classes="column padwidthonly"),
                     Vertical(
-                        Labels("   Highest rate (1.45 max)", classes="label"),
+                        Labels(" Highest rate (1.45 max)", classes="label"),
                         Input(placeholder="Example: 1.35"),
-                        classes="column"),
+                        classes="column padwidthonly"),
                 ),
                 Vertical(
-                    Labels("   Maximum msd for rates (1MSD to 100MSD)", classes="label"),
+                    Labels(" Maximum msd for rates (1MSD to 100MSD)", classes="label"),
                     Input(placeholder="Example: 28.42"),
-                    classes="column"),
+                    classes="column padwidthonly"),
                 Horizontal(
                     Static("   Show skillset msd in diff names             ", classes="btnLabel"),
                     Switch(value=False),
@@ -141,7 +142,7 @@ class ChartAttributes(Container):
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        global OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, uprate_half_increments, keep_pitch
+        global OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, additional_tags, keep_pitch
         # clear_note(self.app)
         log_text=""
         notification_text="Configuration Errors:"
@@ -205,7 +206,16 @@ class ChartAttributes(Container):
             creator="bobermilk"
 
         try:
-            lowest_rate=float(inputs[4])
+            additional_tags=str(inputs[3]).strip()
+        except:
+            log_text+="\n"
+            log_text+="Invalid additional tags, no additional tags will be added"
+        if not creator:
+            log_text+="\n"
+            log_text+="No additional tags specified, no additional tags will be added"
+
+        try:
+            lowest_rate=float(inputs[5])
         except:
             log_text+="\n"
             log_text+="Warning: Invalid lowest rate, defaulting to 1.0"
@@ -217,7 +227,7 @@ class ChartAttributes(Container):
         rates[0]=lowest_rate
 
         try:
-            highest_rate=float(inputs[5])
+            highest_rate=float(inputs[6])
         except:
             log_text+="\n"
             log_text+="Warning: Invalid highest rate, defaulting to 1.0"
@@ -229,7 +239,7 @@ class ChartAttributes(Container):
         rates[1]=highest_rate
 
         try:
-            max_msd=float(inputs[6])
+            max_msd=float(inputs[7])
         except:
             log_text+="\n"
             log_text+="Warning: Invalid maximum msd, no msd limit will be set on uprates"
@@ -249,12 +259,8 @@ class ChartAttributes(Container):
             log_text+="\n"
             log_text+="Warning: Short LNs will remain"
 
-        uprate_half_increments=buttons[1]
-        if uprate_half_increments:
-            log_text+="\n"
-            log_text+="Warning: 0.05 uprate increments will double the number of converted files!"
-        show_skillset_msd=buttons[2]
-        keep_pitch=buttons[3]
+        show_skillset_msd=buttons[1]
+        keep_pitch=buttons[2]
         if not keep_pitch:
             log_text+="\n"
             log_text+="Warning: Disabling keep audio pitch creates nightcore"
@@ -352,7 +358,7 @@ if __name__ == "__main__":
     tui_result=app.run()
     try:
         if tui_result:
-            util.main(OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, uprate_half_increments, keep_pitch)
+            util.main(OD, HP, offset, creator, additional_tags, rates, remove_ln, diff_name_skillset_msd, keep_pitch)
     except:
         pass
 
