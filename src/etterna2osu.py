@@ -99,7 +99,7 @@ class ChartAttributes(Container):
                     classes="padwidthonly"),
                 Vertical(
                     Labels(" Additional search tags", classes="label"),
-                    Input(placeholder="Example: first_convert pizza lemon"),
+                    Input(placeholder="Example: first_convert carrots lemon"),
                     classes="padwidthonly"),
                 Horizontal(
                     Static("   Remove short lns                            ", classes="btnLabel"),
@@ -113,18 +113,28 @@ class ChartAttributes(Container):
                 Static(),
                 Horizontal(
                     Vertical(
-                        Labels(" Lowest rate (0.8 min)", classes="label"),
-                        Input(placeholder="Example: 0.8"),
+                        Labels(" Start rate", classes="label"),
+                        Input(placeholder="Example: 0.9"),
                         classes="column padwidthonly"),
                     Vertical(
-                        Labels(" Highest rate (1.45 max)", classes="label"),
-                        Input(placeholder="Example: 1.35"),
+                        Labels(" Rate increment", classes="label"),
+                        Input(placeholder="Example: 0.1"),
+                        classes="column padwidthonly"),
+                    Vertical(
+                        Labels(" No. of rates", classes="label"),
+                        Input(placeholder="Example: 5"),
                         classes="column padwidthonly"),
                 ),
-                Vertical(
-                    Labels(" Maximum msd for rates (1MSD to 100MSD)", classes="label"),
-                    Input(placeholder="Example: 28.42"),
-                    classes="column padwidthonly"),
+                Horizontal(
+                    Vertical(
+                        Labels(" Minimum msd for rates", classes="label"),
+                        Input(placeholder="Example: 10.2"),
+                        classes="column padwidthonly"),
+                    Vertical(
+                        Labels(" Maximum msd for rates", classes="label"),
+                        Input(placeholder="Example: 28.42"),
+                        classes="column padwidthonly"),
+                ),
                 Horizontal(
                     Static("   Show skillset msd in diff names             ", classes="btnLabel"),
                     Switch(value=False),
