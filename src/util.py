@@ -161,9 +161,15 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                 divisor=1/rates[1]
                 score_goal=0.93
                 max_rate=rates[0]+rates[1]*rates[2]
+                max_rate=int(max_rate*divisor)+1
                 # msd{rate} - diff_names{name} - skillset_msd[]
-                for _rate in range(int(rates[0]*divisor), int(max_rate*divisor)+1) :
-                    rate=_rate/divisor
+                if (rates[0]).is_integer():
+                    min_rate=int(rates[0]*divisor)
+                else:
+                    min_rate=int(rates[0]*divisor)+1
+
+                for _rate in range(min_rate, max_rate):
+                    rate=round(_rate/divisor,2)
                     diff_names={}
                     out=subprocess.run(["..\\..\\..\\tools\\win32\\minacalc.exe", sm, str(rate), str(score_goal)], stdout=subprocess.PIPE).stdout.splitlines()
                     for line in out:
@@ -174,7 +180,8 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                             line=line.split("|")
                             skillset_msd=[round(x, 1) for x in list(map(float,line[1:]))]
                             name=line[0].strip()
-                            if msd_bounds[0]<=skillset_msd[0]<=msd_bounds[1] or rate==1.0:
+                            #todo force 1.0
+                            if (msd_bounds[0]!= 1.0 and msd_bounds[0]<=skillset_msd[0]) or (msd_bounds[1]!=-1.0 and msd_bounds[0]<=msd_bounds[1]) or rate==1.0:
                                 diff_names[name]=skillset_msd
                     if len(diff_names)>0:
                         msd[rate]=diff_names

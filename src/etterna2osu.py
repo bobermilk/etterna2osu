@@ -254,7 +254,7 @@ class ChartAttributes(Container):
             log_text+="Warning: Invalid rate increment, defaulting to 0.1"
             rate_increment=0.1
             rates[1]=rate_increment
-        if rate_increment<0.05 or rate_increment>0.1:
+        if rate_increment<0.05 or rate_increment>0.5:
             notification_text+="\n"
             notification_text+="    - Rate increment out of bounds, please retry with a value in range 0.05 and 0.1"
             fail=True
