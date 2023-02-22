@@ -51,11 +51,13 @@ class Body(Container):
 
 class Welcome(Container):
     def compose(self) -> ComposeResult:
-        yield Labels(Markdown(f"# etterna2osu v{util.APP_VERSION} by bobermilk\n"+
-                              "## Thank you demi, kangalio, nakadashi, guil, marc, chxu, senya, gonx, messica for helping\n"+
-                              "### DM milk#6867 on discord for any queries after reading FAQs at https://milkies.ml/etterna2osu\n"+
-                              "### bobermilk is not liable for any distribution of the converted packs, only upload your own charts"), classes="chicken")
-        yield Button("Start", variant="success")
+        yield Vertical(
+            Labels(Markdown(f"# etterna2osu v{util.APP_VERSION} by bobermilk\n"+
+                                "## Thank you demi, kangalio, nakadashi, guil, marc, chxu, senya, gonx, messica for helping\n"+
+                                "### DM milk#6867 on discord for any queries after reading FAQs at https://milkies.ml/etterna2osu\n"+
+                                "### bobermilk is not liable for any distribution of the converted packs, only upload your own charts"), classes="chicken")
+            ,Button("Start", variant="success")
+        )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         body.mount(ChartAttributes())
@@ -183,12 +185,9 @@ class ChartAttributes(Container):
             fail=True
 
         try:
-            user_offset=inputs[2]
-            if not user_offset:
-                user_offset=0
-            else:
-                user_offset=user_offset.lstrip("-")
-                if user_offset.isdigit():
+            user_offset=str(inputs[2])
+            if user_offset:
+                if user_offset.lstrip("-").isdigit():
                     user_offset=int(user_offset)
                     if user_offset in range(-1000,1001):
                         global offset
@@ -197,11 +196,12 @@ class ChartAttributes(Container):
                         notification_text+="\n"
                         notification_text+="    - User offset too large, (max 1000 milliseconds)"
                         fail=True
-                        user_offset=0
                 else:
-                    user_offset=0
+                    log_text+="\n"
+                    log_text+="User offset not defined, defaulting to 0"
         except:
-            user_offset=0
+            log_text+="\n"
+            log_text+="Invalid user offset, defaulting to 0"
 
         log_text+="\n"
         log_text+=f"Warning: {user_offset} milliseconds will be applied to all converted maps"
@@ -227,85 +227,98 @@ class ChartAttributes(Container):
 
         unspecified_rate_initial=False
         unspecified_rate_increment=False
+        unspecified_rate_cnt=False
+
         try:
             initial_rate=float(inputs[5])
+            rates[0]=initial_rate
         except:
             if not inputs[5].strip():
                 unspecified_rate_increment=True
             log_text+="\n"
             log_text+="Warning: Invalid initial rate rate, defaulting to 1.0"
             initial_rate=1.0
-        if initial_rate<0.8:
+            rates[0]=initial_rate
+        if initial_rate<0.8 or initial_rate>1.45:
             notification_text+="\n"
-            notification_text+="    - Initial rate out of bounds, please retry with a value in range 0.8 to 1.0"
+            notification_text+="    - Initial rate out of bounds, please retry with a value in range 0.8 to 1.45"
             fail=True
-        rates[0]=initial_rate
 
         try:
             rate_increment=float(inputs[6])
+            rates[1]=rate_increment
         except:
             if not inputs[6].strip():
                 unspecified_rate_initial=True
             log_text+="\n"
             log_text+="Warning: Invalid rate increment, defaulting to 0.1"
             rate_increment=0.1
+            rates[1]=rate_increment
         if rate_increment<0.05 or rate_increment>0.1:
             notification_text+="\n"
             notification_text+="    - Rate increment out of bounds, please retry with a value in range 0.05 and 0.1"
             fail=True
-        rates[1]=rate_increment
 
         try:
             rate_cnt=int(inputs[7])
+            rates[2]=rate_cnt
         except:
             log_text+="\n"
-            if not inputs[7].strip() and unspecified_rate_initial and unspecified_rate_increment:
-                log_text+="Warning: no uprate options specified, not uprating anything."
-                rate_cnt=1
+            rate_cnt=1
+            if not inputs[7].strip():
+                unspecified_rate_cnt=True
+                if unspecified_rate_initial and unspecified_rate_increment:
+                    log_text+="Warning: no uprate options specified, defaulitng to not uprating anything."
+                    rates[2]=rate_cnt
             else:
                 notification_text+="\n"
                 notification_text+="    - Rate count has to be a integer greater than 0"
                 fail=True
-        if not rate_cnt>0:
+        if not rate_cnt>0 and not unspecified_rate_cnt:
             notification_text+="\n"
             notification_text+="    - Rate count has to be a integer greater than 0"
             fail=True
-        rates[2]=rate_cnt
 
         unspecified_min_msd=False
+        unspecified_max_msd=False
         try:
             min_msd=float(inputs[8])
+            msd_bounds[0]=min_msd
         except:
             if not inputs[8].strip():
                 unspecified_min_msd=True
             log_text+="\n"
             log_text+="Warning: Invalid minimum msd, defaulting to no minimum msd limits"
             min_msd=-1.0
-        if min_msd<1.0 or min_msd>100.0:
+            msd_bounds[0]=min_msd
+        if not unspecified_min_msd and (min_msd<1.0 or min_msd>100.0):
             notification_text+="\n"
             notification_text+="    - Minimum msd out of bounds, please retry with a value in range 1.0 and 100.0"
             fail=True
-        msd_bounds[0]=min_msd
 
         try:
             max_msd=float(inputs[9])
+            msd_bounds[1]=max_msd
         except:
             log_text+="\n"
-            if not inputs[9].strip() and unspecified_min_msd:
-                log_text+="Warning: no msd ranges specified, no msd bounds for uprates to be generated will be imposed"
-                max_msd=-1
+            if not inputs[9].strip():
+                unspecified_max_msd=True
+                if unspecified_min_msd:
+                    log_text+="Warning: no msd ranges specified, defaulting to no msd bounds for uprates to be generated will be imposed"
+                    max_msd=-1.0
+                    msd_bounds[1]=max_msd
             else:
+                max_msd=-1.0
                 notification_text+="\n"
                 notification_text+="    - Maximum msd out of bounds, please retry with a value in range 1.0 and 100.0"
                 fail=True
 
-        if max_msd<1.0 or max_msd>100.0:
+        if not unspecified_max_msd and (max_msd<1.0 or max_msd>100.0):
             notification_text+="\n"
             notification_text+="    - Maximum msd out of bounds, please retry with a value in range 1.0 and 100.0"
             fail=True
-        rates[2]=max_msd
 
-        if min_msd>max_msd:
+        if not unspecified_min_msd and not unspecified_max_msd and min_msd>max_msd:
             notification_text+="\n"
             notification_text+="    - Minimum msd cannot be greater than maximum msd!"
             fail=True

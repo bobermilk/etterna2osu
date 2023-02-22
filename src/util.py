@@ -59,16 +59,16 @@ def cleanup():
         shutil.rmtree(folder)
 
 def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln, diff_name_skillset_msd, keep_pitch):
-    # print(OD)
-    # print(HP)
-    # print(offset)
-    # print(creator)
-    # print(additional_tags)
-    # print(rates)
-    # print(msd_bounds)
-    # print(remove_ln)
-    # print(diff_name_skillset_msd)
-    # print(keep_pitch)
+    print(OD)
+    print(HP)
+    print(offset)
+    print(creator)
+    print(additional_tags)
+    print(rates)
+    print(msd_bounds)
+    print(remove_ln)
+    print(diff_name_skillset_msd)
+    print(keep_pitch)
 
     # fix win 10 colors
     if os.name == "nt":
