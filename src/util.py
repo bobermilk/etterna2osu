@@ -9,6 +9,7 @@ from sys import platform, exit
 
 APP_VERSION=2
 TARGET_DIR="etterna2osu_song_packs"
+TARGET_DIR_SINGLE="etterna2osu_song_single"
 
 no_sm_detected=True
 failed=[]
@@ -91,16 +92,62 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
     if not os.path.isdir(TARGET_DIR):
         os.mkdir(TARGET_DIR)
         
-    print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-48)/2)+"Configuration successful. Conversion will begin."+bcolors.ENDC)
+    if not os.path.isdir(TARGET_DIR_SINGLE):
+        os.mkdir(TARGET_DIR_SINGLE)
+
     print()
-    print(bcolors.HEADER+"You can obtain etterna packs zips at https://etternaonline.com/packs"+bcolors.ENDC)
-    path = os.path.realpath(TARGET_DIR)
-    try:
-        os.startfile(path)
-    except:
-        pass
-    input(bcolors.WARNING+"Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR)+bcolors.ENDC)
+    print(bcolors.OKGREEN+" "*int((TERMINAL_WIDTH()-48)/2)+"Configuration successful. Conversion will begin."+bcolors.ENDC)
     print()
+
+    one_file_mode=False
+    sm=[f for f in os.listdir(TARGET_DIR_SINGLE) if f.endswith(".sm")]
+    if len(sm)>0:
+        x=f"!!!     Only {sm[0]} in folder etterna2osu_song_single will be converted    !!!"
+        one_file_mode=True
+        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-len(x))/2)+"!"*len(x)+bcolors.ENDC)
+        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-len(x))/2)+x)
+        print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-len(x))/2)+"!"*len(x)+bcolors.ENDC)
+
+        try:
+            if os.path.isfile(f"{TARGET_DIR}\\{TARGET_DIR_SINGLE}.zip"):
+                os.remove(f"{TARGET_DIR}\\{TARGET_DIR_SINGLE}.zip")
+            os.chdir(TARGET_DIR_SINGLE)
+            # chart dir
+            tmpdirname=sm[0][:-3]
+            try:
+                shutil.rmtree(tmpdirname)
+            except:
+                pass
+            os.mkdir(tmpdirname)
+            items=[x for x in os.listdir() if os.path.isfile(x)]
+            for item in items:
+                shutil.copy2(item, tmpdirname)
+            os.chdir("..")
+
+            with zipfile.ZipFile(f"{TARGET_DIR}\\{TARGET_DIR_SINGLE}.zip", 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for root, dirs, files in os.walk(f"{TARGET_DIR_SINGLE}\\{tmpdirname}"):
+                    for file in files:
+                        zipf.write(os.path.join(root, file), 
+                                os.path.relpath(os.path.join(root, file), 
+                                                os.path.join(f"{TARGET_DIR_SINGLE}\\{tmpdirname}", "..", "..")))
+            shutil.rmtree(os.path.join(TARGET_DIR_SINGLE, tmpdirname))
+        except Exception as e:
+            print("Something failed, report this bug to milk#6867")
+
+    print()
+    if not one_file_mode:
+        print(bcolors.HEADER+"You can obtain etterna packs zips at https://etternaonline.com/packs"+bcolors.ENDC)
+        path = os.path.realpath(TARGET_DIR)
+        try:
+            os.startfile(path)
+        except:
+            pass
+        input(bcolors.WARNING+"Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR)+bcolors.ENDC)
+    else:
+        input(bcolors.WARNING+f"Press enter to start converting {sm[0]}"+bcolors.ENDC)
+    print()
+
+
     #TODO: check for folder and non zips
     folder_content = lambda: [f for f in os.listdir(TARGET_DIR) if os.path.isfile(os.path.join(TARGET_DIR, f)) and os.path.splitext(os.path.join(TARGET_DIR, f))[1]==".zip"]
     while len(folder_content())==0:
@@ -108,20 +155,25 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
         input(bcolors.WARNING+"Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR)+bcolors.ENDC)
         print()
 
-    target_files=folder_content()
+    if not one_file_mode:
+        target_files=folder_content()
 
-    print("Detected files:")
-    for i, file in enumerate(target_files, 1):
-        print(f"    {i}. "+file)
-    print()
+        print("Detected files:")
+        for i, file in enumerate(target_files, 1):
+            print(f"    {i}. "+file)
+        print()
 
-    input(bcolors.WARNING +"Press enter to start the conversions on all the song packs in the folder"+bcolors.ENDC)
+        input(bcolors.WARNING +"Press enter to start the conversions on all the song packs in the folder"+bcolors.ENDC)
+    else:
+        target_files=[f'{TARGET_DIR_SINGLE}.zip']
+
     os.chdir(TARGET_DIR)
     cleanup()
 
     for pack_number, pack in enumerate(target_files, 1):
-        print()
-        print(bcolors.OKCYAN + f"Converting {pack} [{pack_number}/{len(target_files)} packs]"+ bcolors.ENDC)
+        if not one_file_mode:
+            print()
+            print(bcolors.OKCYAN + f"Converting {pack} [{pack_number}/{len(target_files)} packs]"+ bcolors.ENDC)
         with zipfile.ZipFile(pack, 'r') as zip_ref:
             zip_ref.extractall(".")
         packfolder=[f for f in os.listdir(".") if not os.path.isfile(f)][0]
@@ -453,8 +505,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                     osz.write(file, compress_type=zipfile.ZIP_DEFLATED)
         else:
             print(bcolors.FAIL+f"There are no charts to convert!"+bcolors.ENDC)
-        no_sm_detected=True
-
+        
         # move on to the next pack
         os.chdir("..")
         cleanup()
@@ -463,6 +514,14 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
         print("Charts that failed to convert:")
         for i, chart in enumerate(failed,1):
             print("    "+f"{i}. {chart[0]} - {chart[1]}")
+    else:
+        if one_file_mode:
+            os.remove(f"{TARGET_DIR_SINGLE}.zip")
+            x=f"{TARGET_DIR_SINGLE}.osz"
+            if os.path.isfile(os.path.join("..", TARGET_DIR_SINGLE, x)):
+                os.remove(os.path.join("..", TARGET_DIR_SINGLE, x))
+            shutil.move(x, f"..\\{TARGET_DIR_SINGLE}\\{tmpdirname}.osz")
+
     print()
     print(f"Beatmaps files generated can be found in the {TARGET_DIR} folder")
     print(bcolors.OKGREEN+"All done! The converted files are all correctly timed :3"+bcolors.ENDC)

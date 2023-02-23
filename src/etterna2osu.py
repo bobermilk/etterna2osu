@@ -95,9 +95,12 @@ class Welcome(Container):
     def compose(self) -> ComposeResult:
         yield Vertical(
             Labels(Markdown(f"# etterna2osu v{util.APP_VERSION} by bobermilk\n"+
-                                "## Thank you demi, kangalio, nakadashi, guil, marc, chxu, senya, gonx, messica for helping\n"+
+                                "### Thank you demi, kangalio, nakadashi, guil, marc, chxu, senya, gonx, messica for helping\n"+
                                 "### DM milk#6867 on discord for any queries after reading FAQs at https://milkies.ml/etterna2osu\n"+
-                                "### bobermilk is not liable for any distribution of the converted packs, only upload your own charts"), classes="chicken")
+                                "### bobermilk is not liable for any distribution of the converted packs, only upload your own charts\n"+
+                                "### _!!! NOTE: One file conversion can be done by putting only one chart folder contents in etterna2osu_song_single folder_"
+                                
+                                ), classes="chicken")
             ,Button("Start", variant="success")
         )
 
