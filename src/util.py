@@ -7,7 +7,7 @@ from PIL import Image
 from math import floor, ceil
 from sys import platform, exit
 
-APP_VERSION=2
+APP_VERSION=1.5
 TARGET_DIR="etterna2osu_song_packs"
 TARGET_DIR_SINGLE="etterna2osu_song_single"
 
