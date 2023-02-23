@@ -1,2 +1,1 @@
-rich
-textual
+textual[dev]
