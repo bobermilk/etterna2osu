@@ -25,6 +25,7 @@ from textual.widgets import (
 is_update=False
 update_url=""
 changelog=""
+changelog_name=""
 
 # def clear_note(self) -> None:
 #     self.query_one(TextLog).clear()
@@ -61,9 +62,10 @@ class Body(Container):
                 data = json.load(url)
                 if util.APP_VERSION < int(data[0]["name"][1:]):
                     is_update=True
-                    global update_url, changelog
+                    global update_url, changelog, changelog_name
                     update_url=data[0]["html_url"]
                     changelog=data[0]["body"]
+                    changelog_name=data[0]["name"]
                     yield Update()
         except:
             pass
@@ -74,7 +76,7 @@ class Body(Container):
 class Update(Container):
     def compose(self) -> ComposeResult:
         yield Vertical(
-            Labels(Markdown(f"# New app version available on github\n"+changelog)),
+            Labels(Markdown(f"# New update v{util.APP_VERSION} -> {changelog_name} available on github\n"+changelog)),
             Static(),
             Static(),
             Static(),
