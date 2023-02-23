@@ -42,7 +42,7 @@ Advanced converter for etterna charts to osu beatmaps
 ```
 git clone https://github.com/bobermilk/etterna2osu/
 cd etterna2osu/src
-pip install -r requirements.txt
+pip install -r ../requirements.txt
 python etterna2osu.py
 ```
 # Demo
