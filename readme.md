@@ -1,4 +1,4 @@
-[![logo](https://github.com/bobermilk/etterna2osu/blob/master/icon.ico?raw=true)]()
+[![logo](https://github.com/bobermilk/etterna2osu/blob/master/icon.ico?raw=true)](https://www.youtube.com/watch?v=u13dbj8gv1Y)
 # etterna2osu 
 Advanced converter for etterna charts to osu beatmaps
 
