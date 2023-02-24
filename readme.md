@@ -2,6 +2,8 @@
 # etterna2osu 
 Advanced converter for etterna charts to osu beatmaps
 
+You do not require etterna to run this tool
+
 # Features
 
     General
@@ -49,5 +51,6 @@ python etterna2osu.py
 [![asciicast](https://asciinema.org/a/559338.svg)](https://asciinema.org/a/559338)
 # Credits
 ### DemiFiendSMT, nakadashi, marcino, guilhermeziat, chxu, senya, gonx, messica for feedback
+### zardoru for raindrop
 ### kangalioo for minacalc C api
 ### Trippin for beatmap rate changer
