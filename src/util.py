@@ -465,7 +465,8 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                             # pool.starmap(rateChangeMap, tasks_maps)
                             for t in tasks_maps:
                                 rateChangeMap(t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9])
-                            rateChangeAudio(tasks_audio, i, keep_pitch)
+                            if len(tasks_audio)>0:
+                                rateChangeAudio(tasks_audio, i, keep_pitch)
                                     
                             osues=[f for f in os.listdir(".") if f.endswith(".osu") or f.endswith(".mp3")]
                             for osu in osues:
