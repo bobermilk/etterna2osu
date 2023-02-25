@@ -145,17 +145,14 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
         input(bcolors.WARNING+"Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR)+bcolors.ENDC)
     else:
         input(bcolors.WARNING+f"Press enter to start converting {sm[0]}"+bcolors.ENDC)
-    print()
-
-
-    #TODO: check for folder and non zips
-    folder_content = lambda: [f for f in os.listdir(TARGET_DIR) if os.path.isfile(os.path.join(TARGET_DIR, f)) and os.path.splitext(os.path.join(TARGET_DIR, f))[1]==".zip"]
-    while len(folder_content())==0:
-        print(bcolors.FAIL+"No packs are in etterna_to_osu folder"+bcolors.ENDC)
-        input(bcolors.WARNING+"Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR)+bcolors.ENDC)
-        print()
 
     if not one_file_mode:
+        print()
+        folder_content = lambda: [f for f in os.listdir(TARGET_DIR) if os.path.isfile(os.path.join(TARGET_DIR, f)) and os.path.splitext(os.path.join(TARGET_DIR, f))[1]==".zip"]
+        while len(folder_content())==0:
+            print(bcolors.FAIL+"No packs are in etterna_to_osu folder"+bcolors.ENDC)
+            input(bcolors.WARNING+"Place all the etterna pack zips you want in the folder {}, then press enter".format(TARGET_DIR)+bcolors.ENDC)
+        print()
         target_files=folder_content()
 
         print("Detected files:")
