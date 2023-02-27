@@ -21,7 +21,7 @@ You do not require etterna to run this tool
         • Change shlongs to normal notes (short LNs with hold duration not exceeding 1/8 snap)
 
     Conversion MSD
-        • Use minacalc v472 as msd calculator (used in etterna 0.72.1)
+        • Use minacalc v505 as msd calculator (used in etterna 0.72.1)
         • Overall MSD in conversion diff names
         • Customize specific skillset MSD in conversion difficulty names
 

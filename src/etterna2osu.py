@@ -60,7 +60,7 @@ class Body(Container):
         try:
             with urllib.request.urlopen("https://api.github.com/repos/bobermilk/etterna2osu/releases") as url:
                 data = json.load(url)
-                if util.APP_VERSION < int(data[0]["name"][1:]):
+                if util.APP_VERSION < float(data[0]["name"][1:]):
                     is_update=True
                     global update_url, changelog, changelog_name
                     update_url=data[0]["html_url"]
