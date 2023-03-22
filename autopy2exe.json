@@ -7,7 +7,7 @@
   },
   {
    "optionDest": "filenames",
-   "value": "C:/Users/morga/Desktop/OffsetCalculator/src/etterna2osu.py"
+   "value": "C:/Users/milk/Desktop/projects/etterna2osu/src/etterna2osu.py"
   },
   {
    "optionDest": "onefile",
@@ -19,7 +19,7 @@
   },
   {
    "optionDest": "icon_file",
-   "value": "C:/Users/morga/Desktop/OffsetCalculator/icon.ico"
+   "value": "C:/Users/milk/Desktop/projects/etterna2osu/icon.ico"
   },
   {
    "optionDest": "ascii",
@@ -71,7 +71,7 @@
   },
   {
    "optionDest": "datas",
-   "value": "C:/Users/morga/Desktop/OffsetCalculator/src;."
+   "value": "C:/Users/milk/Desktop/projects/etterna2osu/src;."
   }
  ],
  "nonPyinstallerOptions": {
