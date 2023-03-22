@@ -452,12 +452,12 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                             tasks_audio=[]
                             tasks_maps=[]
                             for rate in msd_rates:
-                                for osu in osues:
-                                    if rate != 1.0: # check if minacalc didn't fail and give us a empty dict of skillset_msd
-                                        diff_name=re.findall("\[(.*?)\]",osu)[-1].split("(")[0]
-                                        s=list(map(str, msd[rate][diff_name]))
-                                        tasks_maps.append((rate, osu, s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]))
-                                        tasks_audio.append(rate)
+                                if rate != 1.0: # check if minacalc didn't fail and give us a empty dict of skillset_msd
+                                    for osu in osues:
+                                            diff_name=re.findall("\[(.*?)\]",osu)[-1].split("(")[0]
+                                            s=list(map(str, msd[rate][diff_name]))
+                                            tasks_maps.append((rate, osu, s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]))
+                                    tasks_audio.append(rate)
 
                             # pool.starmap(rateChangeMap, tasks_maps)
                             for t in tasks_maps:
