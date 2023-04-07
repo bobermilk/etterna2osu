@@ -262,9 +262,8 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                                     skillset_msd_text+=f"{skillset_msd_title}:{skillset_msd_value}"
                                                     skillset_msd_text+="|"
                                             skillset_msd_text=skillset_msd_text[:-1]
-                                            skillset_msd_text+=")"
-                                            if skillset_msd_commit:
-                                                edit.write("Version: "+diff_name+ " 1.0x - "+str(skillset_msd[0]) +" MSD " + skillset_msd_text)
+                                            if skillset_msd_text:
+                                                edit.write("Version: "+diff_name+ " 1.0x - "+str(skillset_msd[0]) +" MSD " + skillset_msd_text + ")")
                                             else:
                                                 edit.write("Version: "+diff_name+ " 1.0x - "+str(skillset_msd[0]) +" MSD")
                                             edit.write("\n")
@@ -338,7 +337,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                         edit.write("AudioFilename: "+audio_filename)
                                         edit.write("\n")
                                     elif "Tags:" in f[j]:
-                                        tags=f"Tags: etterna etterna2osu etterna2osu_v{int(APP_VERSION)} minacalc_v{calc_version} {additional_tags}"
+                                        tags=f"Tags: etterna etterna2osu etterna2osu_v{int(APP_VERSION)}minacalc_v{calc_version} {additional_tags}"
                                         if remove_ln:
                                             tags+=" no_shlongs"
                                         tags+="\n"
