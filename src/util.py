@@ -194,6 +194,8 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                 no_sm_detected=False
                 sm=sm[0]
                 os.chdir(chart)
+                with open(sm, "r", encoding="utf-8") as g:
+                    sm_string=g.read()
                 score_goal=0.93
                 all_chart_rates=[rates[0]+rates[1]*x for x in range(0, rates[2])]
                 # we force 1.0x msd to be calculated
@@ -247,14 +249,22 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                         edit.write("Title: "+packfolder+" - "+title)
                                         edit.write("\n")
                                     elif "TitleUnicode:" in f[j]:
-                                        with open(sm, "r", encoding="utf-8") as g:
-                                            title_unicode=re.findall("(?<=#TITLETRANSLIT:).*(?=;)", g.read())
-                                        if len(title_unicode[0].strip())==0:
+                                        title_unicode=re.findall("(?<=#TITLETRANSLIT:).*(?=;)", sm_string)
+                                        if len(title_unicode)==0 or (len(title_unicode)>0 and len(title_unicode[0].strip())==0):
                                             title=re.split("[:]", f[j])
                                             del title[0]
                                             title_unicode=''.join(title).strip()
+                                        else:
+                                            title_unicode=title_unicode[0].strip()
                                         edit.write("TitleUnicode: "+packfolder+" - "+title_unicode)
                                         edit.write("\n")
+                                    elif "ArtistUnicode:" in f[j]:
+                                        artist_unicode=re.findall("(?<=#ARTISTTRANSLIT:).*(?=;)", sm_string)
+                                        if len(artist_unicode)>0 and len(artist_unicode[0].strip())>0:
+                                            edit.write("ArtistUnicode: "+artist_unicode[0].strip())
+                                            edit.write("\n")
+                                        else:
+                                            edit.write(f[j])
                                     elif "Version:" in f[j]:
                                         diff_name=re.split("[: (]", f[j])[2]
                                         if diff_name in msd[1.0]:
