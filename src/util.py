@@ -247,10 +247,13 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                         edit.write("Title: "+packfolder+" - "+title)
                                         edit.write("\n")
                                     elif "TitleUnicode:" in f[j]:
-                                        title=re.split("[:]", f[j])
-                                        del title[0]
-                                        title=''.join(title).strip()
-                                        edit.write("TitleUnicode: "+packfolder+" - "+title)
+                                        with open(sm, "r", encoding="utf-8") as g:
+                                            title_unicode=re.findall("(?<=#TITLETRANSLIT:).*(?=;)", g.read())
+                                        if len(title_unicode[0].strip())==0:
+                                            title=re.split("[:]", f[j])
+                                            del title[0]
+                                            title_unicode=''.join(title).strip()
+                                        edit.write("TitleUnicode: "+packfolder+" - "+title_unicode)
                                         edit.write("\n")
                                     elif "Version:" in f[j]:
                                         diff_name=re.split("[: (]", f[j])[2]
