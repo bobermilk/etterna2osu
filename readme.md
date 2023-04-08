@@ -37,8 +37,6 @@ You do not require etterna to run this tool
 2. Unzip the contents into a folder
 3. Double click on etterna2osu.exe
 
-Note: if you encounter the msvcr100.dll missing error message when you start conversions, download vcredist_x86.exe from [microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=26999) and restart etterna2osu
-
 ## Option 2: Run from source
 1. Install latest python from [python releases](https://www.python.org/downloads/)
 2. Open command prompt
@@ -49,10 +47,14 @@ cd etterna2osu/src
 pip install -r ../requirements.txt
 python etterna2osu.py
 ```
+### Notes:
+- if you encounter the msvcr100.dll missing error message when you start conversions, download vcredist_x86.exe from [microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=26999) and restart etterna2osu
+- you require the English (United States) system locale to run the tool
+
 # Demo
 [![asciicast](https://asciinema.org/a/559338.svg)](https://asciinema.org/a/559338)
 # Credits
-### DemiFiendSMT, nakadashi, marcino, guilhermeziat, chxu, senya, gonx, messica for feedback
+### DemiFiendSMT, nakadashi, marcinho, guilhermeziat, chxu, senya, gonx, messica for feedback
 ### zardoru for raindrop
 ### kangalioo for minacalc C api
 ### Trippin for beatmap rate changer
