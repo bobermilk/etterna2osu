@@ -211,8 +211,20 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                 no_sm_detected=False
                 sm=sm[0]
                 os.chdir(chart)
-                with open(sm, "r", encoding="utf-8") as g:
-                    sm_string=g.read()
+                
+                # sanitize title in the sm
+                with open(sm, "r+", encoding="utf-8") as g:
+                    sm_string=f.read()
+                    chart_title=re.findall("(?<=#TITLE:).*(?=;)", sm_string)
+                    if len(chart_title)>0 and len(chart_title[0].strip())>0:
+                        chart_title=chart_title[0].strip()
+                        sm_string=re.sub("(?=#TITLE:).*(?<=;)", "#TITLE:"+slugify(chart_title)+";", sm_string, 1)
+                    else:
+                        chart_title="Unnamed Chart" # we need this to use for the osu file name
+                    f.seek(0) # point to begin
+                    f.write(sm_string)
+                    f.truncate() # if the new text is shorter we have trailing characters, we cut that off
+                    
                 score_goal=0.93
                 all_chart_rates=[rates[0]+rates[1]*x for x in range(0, rates[2])]
                 # we force 1.0x msd to be calculated
@@ -260,10 +272,10 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                         edit.write("Creator: "+ creator)
                                         edit.write("\n")
                                     elif "Title:" in f[j]:
-                                        title=re.split("[:]", f[j])
-                                        del title[0]
-                                        title=''.join(title).strip()
-                                        edit.write("Title: "+packfolder+" - "+title)
+                                        #title=re.split("[:]", f[j])
+                                        #del title[0]
+                                        #title=''.join(title).strip()
+                                        edit.write("Title: "+packfolder+" - "+chart_title)
                                         edit.write("\n")
                                     elif "TitleUnicode:" in f[j]:
                                         title_unicode=re.findall("(?<=#TITLETRANSLIT:).*(?=;)", sm_string)
