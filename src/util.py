@@ -61,7 +61,7 @@ def cleanup():
 
 def slugify(value, allow_unicode=True):
     """
-    Taken from https://github.com/django/django/blob/master/django/utils/text.py
+    Modified from https://github.com/django/django/blob/master/django/utils/text.py
     Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
     dashes to single dashes. Remove characters that aren't alphanumerics,
     underscores, or hyphens. Convert to lowercase. Also strip leading and
@@ -72,8 +72,8 @@ def slugify(value, allow_unicode=True):
         value = unicodedata.normalize('NFKC', value)
     else:
         value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
-    value = re.sub(r'[^\w\s-]', '', value.lower())
-    return re.sub(r'[-\s]+', '-', value).strip('-_')
+    value = re.sub(r'[^\w\s-]', '', value)
+    return re.sub(r'[-\s]+', ' ', value).strip('-_')
 
 def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln, diff_name_skillset_msd, keep_pitch):
     # print(OD)
@@ -214,17 +214,22 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                 
                 # sanitize title in the sm
                 with open(sm, "r+", encoding="utf-8") as g:
-                    sm_string=f.read()
+                    sm_string=g.read()
                     chart_title=re.findall("(?<=#TITLE:).*(?=;)", sm_string)
                     if len(chart_title)>0 and len(chart_title[0].strip())>0:
                         chart_title=chart_title[0].strip()
                         sm_string=re.sub("(?=#TITLE:).*(?<=;)", "#TITLE:"+slugify(chart_title)+";", sm_string, 1)
                     else:
                         chart_title="Unnamed Chart" # we need this to use for the osu file name
-                    f.seek(0) # point to begin
-                    f.write(sm_string)
-                    f.truncate() # if the new text is shorter we have trailing characters, we cut that off
-                    
+                    g.seek(0) # point to begin
+                    g.write(sm_string)
+                    g.truncate() # if the new text is shorter we have trailing characters, we cut that off
+                title_unicode=re.findall("(?<=#TITLETRANSLIT:).*(?=;)", sm_string)
+                if len(title_unicode)>0 and len(title_unicode[0].strip())>0:
+                    title_unicode=title_unicode[0].strip()
+                else:
+                    title_unicode=""
+ 
                 score_goal=0.93
                 all_chart_rates=[rates[0]+rates[1]*x for x in range(0, rates[2])]
                 # we force 1.0x msd to be calculated
@@ -260,7 +265,15 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                 background_filename="foobaruwu"
                 try:
                     for osu in osues:
-                        with open(f"{osu}.tmp", "a", encoding="utf8") as edit:
+                        # handle convert filename
+                        # Example: Be Myself (いて) [Beginner(dance-single)]
+                        osu_filename=re.split(r"\[|\]",osu)
+                        if title_unicode:
+                            osu_title_unicode=slugify(title_unicode)+" - "
+                        else:
+                            osu_title_unicode=""
+                        # rip if you have multiple unnamed charts
+                        with open(f"{osu_title_unicode} {slugify(chart_title)} [{osu_filename[1]}].osu.tmp", "w", encoding="utf8") as edit:
                             skip=False
                             with open(osu, encoding="utf8") as beatmap:
                                 f=beatmap.readlines()
@@ -278,14 +291,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                         edit.write("Title: "+packfolder+" - "+chart_title)
                                         edit.write("\n")
                                     elif "TitleUnicode:" in f[j]:
-                                        title_unicode=re.findall("(?<=#TITLETRANSLIT:).*(?=;)", sm_string)
-                                        if len(title_unicode)==0 or (len(title_unicode)>0 and len(title_unicode[0].strip())==0):
-                                            title=re.split("[:]", f[j])
-                                            del title[0]
-                                            title_unicode=''.join(title).strip()
-                                        else:
-                                            title_unicode=title_unicode[0].strip()
-                                        edit.write("TitleUnicode: "+packfolder+" - "+title_unicode)
+                                        edit.write("TitleUnicode: "+title_unicode)
                                         edit.write("\n")
                                     elif "ArtistUnicode:" in f[j]:
                                         artist_unicode=re.findall("(?<=#ARTISTTRANSLIT:).*(?=;)", sm_string)
