@@ -212,58 +212,60 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                 sm=sm[0]
                 os.chdir(chart)
                 
-                # sanitize title in the sm
-                with open(sm, "r+", encoding="utf-8") as g:
-                    sm_string=g.read()
-                    chart_title=re.findall("(?<=#TITLE:).*(?=;)", sm_string)
-                    if len(chart_title)>0 and len(chart_title[0].strip())>0:
-                        chart_title=chart_title[0].strip()
-                        sm_string=re.sub("(?=#TITLE:).*(?<=;)", "#TITLE:"+slugify(chart_title)+";", sm_string, 1)
-                    else:
-                        chart_title="Unnamed Chart" # we need this to use for the osu file name
-                    g.seek(0) # point to begin
-                    g.write(sm_string)
-                    g.truncate() # if the new text is shorter we have trailing characters, we cut that off
-                title_unicode=re.findall("(?<=#TITLETRANSLIT:).*(?=;)", sm_string)
-                if len(title_unicode)>0 and len(title_unicode[0].strip())>0:
-                    title_unicode=title_unicode[0].strip()
-                else:
-                    title_unicode=""
- 
-                score_goal=0.93
-                all_chart_rates=[rates[0]+rates[1]*x for x in range(0, rates[2])]
-                # we force 1.0x msd to be calculated
-                if 1.0 not in all_chart_rates:
-                    all_chart_rates.append(1.0)
-
-                for _rate in all_chart_rates:
-                    rate=round(_rate,2)
-                    diff_names={}
-                    out=subprocess.run(["..\\..\\..\\tools\\win32\\minacalc.exe", sm, str(rate), str(score_goal)], stdout=subprocess.PIPE).stdout.splitlines()
-                    for line in out:
-                        line=line.decode()
-                        if "skipping" in line:
-                            break
-                        if "|" in line:
-                            line=line.split("|")
-                            skillset_msd=[round(x, 1) for x in list(map(float,line[1:]))]
-                            name=line[0].strip()
-                            # always write diff name for later
-                            diff_names[name]=skillset_msd
-                            # skip this rate or not
-                            if ((msd_bounds[0]!=-1.0 and msd_bounds[0]<=skillset_msd[0]) or msd_bounds[0]==-1) and ((msd_bounds[1]!=-1.0 and skillset_msd[0]<=msd_bounds[1]) or msd_bounds[1]==-1) or rate==1.0:
-                                msd[rate]=diff_names
-
-                if platform == "win32":
-                    subprocess.run([f'..\\..\\..\\tools\\win32\\raindrop\\raindrop.exe', '-g', 'om', '-i', sm, '-o', '.'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                else:
-                    subprocess.run(["wine", f'..\\..\\..\\tools\\win32\\raindrop\\raindrop.exe', '-g', 'om', '-i', sm, '-o', '.'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                # converted files handle offset and sv and titles
-                osues=[f for f in os.listdir(".") if f.endswith(".osu")]
-
-                audio_filename=str(i)+".mp3"
-                background_filename="foobaruwu"
                 try:
+                    # sanitize title in the sm
+                    with open(sm, "r+", encoding="utf-8") as g:
+                        sm_string=g.read()
+                        chart_title=re.findall("(?<=#TITLE:).*(?=;)", sm_string)
+                        if len(chart_title)>0 and len(chart_title[0].strip())>0:
+                            chart_title=chart_title[0].strip()
+                            sm_string=re.sub("(?=#TITLE:).*(?<=;)", "#TITLE:"+slugify(chart_title)+";", sm_string, 1)
+                        else:
+                            chart_title="Unnamed Chart" # we need this to use for the osu file name
+                        g.seek(0) # point to begin
+                        g.write(sm_string)
+                        g.truncate() # if the new text is shorter we have trailing characters, we cut that off
+                    title_unicode=re.findall("(?<=#TITLETRANSLIT:).*(?=;)", sm_string)
+                    if len(title_unicode)>0 and len(title_unicode[0].strip())>0:
+                        title_unicode=title_unicode[0].strip()
+                    else:
+                        title_unicode=""
+     
+                    score_goal=0.93
+                    all_chart_rates=[rates[0]+rates[1]*x for x in range(0, rates[2])]
+                    # we force 1.0x msd to be calculated
+                    if 1.0 not in all_chart_rates:
+                        all_chart_rates.append(1.0)
+
+                    for _rate in all_chart_rates:
+                        rate=round(_rate,2)
+                        diff_names={}
+                        out=subprocess.run(["..\\..\\..\\tools\\win32\\minacalc.exe", sm, str(rate), str(score_goal)], stdout=subprocess.PIPE).stdout.splitlines()
+                        for line in out:
+                            line=line.decode()
+                            if "skipping" in line:
+                                break
+                            if "|" in line:
+                                line=line.split("|")
+                                skillset_msd=[round(x, 1) for x in list(map(float,line[1:]))]
+                                name=line[0].strip()
+                                # always write diff name for later
+                                diff_names[name]=skillset_msd
+                                # skip this rate or not
+                                if ((msd_bounds[0]!=-1.0 and msd_bounds[0]<=skillset_msd[0]) or msd_bounds[0]==-1) and ((msd_bounds[1]!=-1.0 and skillset_msd[0]<=msd_bounds[1]) or msd_bounds[1]==-1) or rate==1.0:
+                                    msd[rate]=diff_names
+
+                    if platform == "win32":
+                        subprocess.run([f'..\\..\\..\\tools\\win32\\raindrop\\raindrop.exe', '-g', 'om', '-i', sm, '-o', '.'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    else:
+                        subprocess.run(["wine", f'..\\..\\..\\tools\\win32\\raindrop\\raindrop.exe', '-g', 'om', '-i', sm, '-o', '.'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    # converted files handle offset and sv and titles
+                    osues=[f for f in os.listdir(".") if f.endswith(".osu")]
+
+                    audio_filename=str(i)+".mp3"
+                    background_filename="foobaruwu"
+
+                    # per chart conversion
                     for osu in osues:
                         # handle convert filename
                         # Example: Be Myself (いて) [Beginner(dance-single)]
