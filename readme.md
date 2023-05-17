@@ -48,7 +48,8 @@ pip install -r ../requirements.txt
 python etterna2osu.py
 ```
 ### Notes:
-- if you encounter the msvcr100.dll missing error message when you start conversions, download vcredist_x86.exe from [microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=26999) and restart etterna2osu
+- if you encounter the msvcr100.dll missing error message when you start conversions, download [vcredist](https://kutt.it/vcpp) and restart etterna2osu
+- uprate with the in-app uprater or trippin's uprater, do not use funorange's osu trainer because the output might be corrupted at times
 - you require the English (United States) system locale to run the tool
 
 # Demo
