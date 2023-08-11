@@ -51,6 +51,7 @@ python etterna2osu.py
 - if you encounter the msvcr100.dll missing error message when you start conversions, download [vcredist](https://kutt.it/vcpp) and restart etterna2osu
 - uprate with the in-app uprater or trippin's uprater, do not use funorange's osu trainer because the output might be corrupted at times
 - you require the English (United States) system locale to run the tool
+- to convert your entire song folder in one go: move zipall_folders.bat into your etterna song folder, and double click it, then move all the generated zip files as input for etterna2osu
 
 # Demo
 [![asciicast](https://asciinema.org/a/559338.svg)](https://asciinema.org/a/559338)
