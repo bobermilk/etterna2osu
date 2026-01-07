@@ -3,18 +3,20 @@ Input {
     content-align: center middle;
     max-height: 50%;
 }
+
 .column {
     width: 1fr;
 }
-Vertical{
-    padding:1;
+
+Vertical {
+    padding: 1;
 }
 
-.padwidthonly{
+.padwidthonly {
     padding: 0 1;
 }
 
-Button{
+Button {
     width: 100%;
     margin-left: 2;
     margin-right: 2;
@@ -25,6 +27,7 @@ Button{
     content-align: center middle;
     width: auto;
 }
+
 .container {
     height: auto;
     width: auto;
@@ -38,15 +41,17 @@ Switch {
     height: auto;
     width: auto;
 }
+
 Labels {
-    color:deeppink;
+    color: deeppink;
 }
+
 SectionTitle {
     padding: 1 2;
     background: $boost;
     text-align: center;
     text-style: bold;
-    color:blueviolet;
+    color: blueviolet;
 }
 
 TextLog {
@@ -80,7 +85,7 @@ Screen {
 
 Notification {
     dock: bottom;
-    layer: notification;
+    layer: notifications;
     width: auto;
     margin: 2 4;
     padding: 1 2;
