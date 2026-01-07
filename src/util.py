@@ -76,17 +76,6 @@ def slugify(value, allow_unicode=True):
     return re.sub(r'[-\s]+', ' ', value).strip('-_')
 
 def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln, diff_name_skillset_msd, keep_pitch):
-    # print(OD)
-    # print(HP)
-    # print(offset)
-    # print(creator)
-    # print(additional_tags)
-    # print(rates)
-    # print(msd_bounds)
-    # print(remove_ln)
-    # print(diff_name_skillset_msd)
-    # print(keep_pitch)
-
     # fix win 10 colors
     if os.name == "nt":
         import ctypes
@@ -126,8 +115,8 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
         print(bcolors.OKCYAN+" "*int((TERMINAL_WIDTH()-len(x))/2)+"!"*len(x)+bcolors.ENDC)
 
         try:
-            if os.path.isfile(f"{TARGET_DIR}\\{TARGET_DIR_SINGLE}.zip"):
-                os.remove(f"{TARGET_DIR}\\{TARGET_DIR_SINGLE}.zip")
+            if os.path.isfile(os.path.join(TARGET_DIR, f"{TARGET_DIR_SINGLE}.zip")):
+                os.remove(os.path.join(TARGET_DIR, f"{TARGET_DIR_SINGLE}.zip"))
             os.chdir(TARGET_DIR_SINGLE)
             # chart dir
             tmpdirname=sm[0][:-3]
@@ -141,12 +130,12 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                 shutil.copy2(item, tmpdirname)
             os.chdir("..")
 
-            with zipfile.ZipFile(f"{TARGET_DIR}\\{TARGET_DIR_SINGLE}.zip", 'w', zipfile.ZIP_DEFLATED) as zipf:
-                for root, dirs, files in os.walk(f"{TARGET_DIR_SINGLE}\\{tmpdirname}"):
+            with zipfile.ZipFile(os.path.join(TARGET_DIR, f"{TARGET_DIR_SINGLE}.zip"), 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for root, dirs, files in os.walk(os.path.join(TARGET_DIR_SINGLE, tmpdirname)):
                     for file in files:
                         zipf.write(os.path.join(root, file), 
                                 os.path.relpath(os.path.join(root, file), 
-                                                os.path.join(f"{TARGET_DIR_SINGLE}\\{tmpdirname}", "..", "..")))
+                                                os.path.join(TARGET_DIR_SINGLE, tmpdirname, "..", "..")))
             shutil.rmtree(os.path.join(TARGET_DIR_SINGLE, tmpdirname))
         except Exception as e:
             print("Something failed, report this bug to milk#6867")
@@ -216,16 +205,16 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                     # sanitize title in the sm
                     with open(sm, "r+", encoding="utf-8") as g:
                         sm_string=g.read()
-                        chart_title=re.findall("(?<=#TITLE:).*(?=;)", sm_string)
+                        chart_title=re.findall(r"(?<=#TITLE:).*(?=;)", sm_string)
                         if len(chart_title)>0 and len(chart_title[0].strip())>0:
                             chart_title=chart_title[0].strip()
-                            sm_string=re.sub("(?=#TITLE:).*(?<=;)", "#TITLE:"+slugify(chart_title)+";", sm_string, 1)
+                            sm_string=re.sub(r"(?=#TITLE:).*(?<=;)", "#TITLE:"+slugify(chart_title)+";", sm_string, 1)
                         else:
                             chart_title="Unnamed Chart" # we need this to use for the osu file name
                         g.seek(0) # point to begin
                         g.write(sm_string)
                         g.truncate() # if the new text is shorter we have trailing characters, we cut that off
-                    title_unicode=re.findall("(?<=#TITLETRANSLIT:).*(?=;)", sm_string)
+                    title_unicode=re.findall(r"(?<=#TITLETRANSLIT:).*(?=;)", sm_string)
                     if len(title_unicode)>0 and len(title_unicode[0].strip())>0:
                         title_unicode=title_unicode[0].strip()
                     else:
@@ -287,23 +276,20 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                         edit.write("Creator: "+ creator)
                                         edit.write("\n")
                                     elif "Title:" in f[j]:
-                                        #title=re.split("[:]", f[j])
-                                        #del title[0]
-                                        #title=''.join(title).strip()
                                         edit.write("Title: "+packfolder+" - "+chart_title)
                                         edit.write("\n")
                                     elif "TitleUnicode:" in f[j]:
                                         edit.write("TitleUnicode: "+title_unicode)
                                         edit.write("\n")
                                     elif "ArtistUnicode:" in f[j]:
-                                        artist_unicode=re.findall("(?<=#ARTISTTRANSLIT:).*(?=;)", sm_string)
+                                        artist_unicode=re.findall(r"(?<=#ARTISTTRANSLIT:).*(?=;)", sm_string)
                                         if len(artist_unicode)>0 and len(artist_unicode[0].strip())>0:
                                             edit.write("ArtistUnicode: "+artist_unicode[0].strip())
                                             edit.write("\n")
                                         else:
                                             edit.write(f[j])
                                     elif "Version:" in f[j]:
-                                        diff_name=re.split("[: (]", f[j])[2]
+                                        diff_name=re.split(r"[: (]", f[j])[2]
                                         if diff_name in msd[1.0]:
                                             skillset_msd=msd[1.0][diff_name]
                                             skillset_msd_text="("
@@ -327,7 +313,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                             audio=audio[1:]
                                         # is there a entry
                                         if "." in audio:
-                                            if not os.path.isfile(f"..\\{audio_filename}"):
+                                            if not os.path.isfile(os.path.join("..", audio_filename)):
                                                 if not os.path.isfile(audio):
                                                     audios=[x for x in os.listdir() if x.endswith(('.mp3','.mp4','.ogg','.wav'))]
                                                     if len(audios)>0:
@@ -360,29 +346,9 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                                     subprocess.run(["..\\..\\..\\darwin\\win32\\ffmpeg", "-f", "s16le",  "-ar", str(sample_rate) ,"-ac", str(channel_count), "-i", "etterna_offset.raw","-codec:a" ,"libmp3lame" ,"-b:a" , average_bitrate, "etterna_offset.mp3"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
-                                                shutil.move("etterna_offset.mp3", f"..\\{audio_filename}")
+                                                shutil.move("etterna_offset.mp3", os.path.join("..", audio_filename))
                                                 os.remove("etterna_offset.raw")
                                                 os.remove(audio)
-                                                    
-                                                # if oldext == ".mp3":
-                                                #     audio_filename=str(i)+".mp3"
-                                                #     subprocess.run([f"..\\..\\..\\tools\\test.exe", audio], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                                                #     subprocess.run([f"..\\..\\..\\tools\\lame.exe", "-r", "etterna_offset.raw"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                                                #     os.remove("etterna_offset.raw")
-                                                    
-                                                #     # subprocess.call(f'ffmpeg -i "{audio[0]+oldext}" "{audio[0]+".wav"}"', shell=True)
-                                                # else:
-                                                #     audio_filename=str(i)+".wav"
-
-                                                # try:
-                                                #     if oldext==".mp3":
-                                                #         shutil.move("etterna_offset.mp3", f"..\\{audio_filename}")
-                                                #     else:
-                                                #         shutil.move(audio, f"..\\{audio_filename}")
-                                                # except:
-                                                #     # specified file does not exist. moving on.
-                                                #     stop=True
-                                                #     pass
 
                                         edit.write("AudioFilename: "+audio_filename)
                                         edit.write("\n")
@@ -406,7 +372,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                         image_ext=os.path.splitext(image_filename)[1]
                                         background_filename=str(i)+image_ext
 
-                                        if not os.path.isfile(f"..\\{background_filename}"):
+                                        if not os.path.isfile(os.path.join("..", background_filename)):
                                             if not os.path.isfile(image_filename):
                                                 # specified file does not exist. attempting to get the largest res image from the directory
                                                 max_area=0
@@ -423,7 +389,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                                 except:
                                                     pass
                                             try:
-                                                shutil.move(image_filename, f"..\\{background_filename}")
+                                                shutil.move(image_filename, os.path.join("..", background_filename))
                                             except:
                                                 pass
 
@@ -489,7 +455,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                                         edit.write(f[j])
 
                     # double checking
-                    if os.path.isfile(f"..\{audio_filename}"):
+                    if os.path.isfile(os.path.join("..", audio_filename)):
                         try:
                             for osu in osues:
                                 os.remove(osu)
@@ -503,7 +469,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                             for rate in msd_rates:
                                 if rate != 1.0: # check if minacalc didn't fail and give us a empty dict of skillset_msd
                                     for osu in osues:
-                                            diff_name=re.findall("\[(.*?)\]",osu)[-1].split("(")[0]
+                                            diff_name=re.findall(r"\[(.*?)\]",osu)[-1].split("(")[0]
                                             s=list(map(str, msd[rate][diff_name]))
                                             tasks_maps.append((rate, osu, s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]))
                                     tasks_audio.append(rate)
@@ -520,10 +486,6 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                         except Exception as e:
                             stop=2
                 except Exception as e:
-                    # import sys
-                    # exc_type, exc_obj, exc_tb = sys.exc_info()
-                    # fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                    # print(exc_type, fname, exc_tb.tb_lineno)
                     stop=1
                 if stop==0:
                     msg="[ Good ✓ ]"
@@ -538,7 +500,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
                         audios=[x for x in os.listdir("..") if x.endswith(('.wav'))]
                         for audio in audios:
                             if audio[0] == str(i):
-                                os.remove(f"..\\{audio}")
+                                os.remove(os.path.join("..", audio))
                     failed.append((chart, stop_err))
                     print(chart+"  "+bcolors.WARNING+"-"*(TERMINAL_WIDTH()-len(chart)-(len(stop_err)+6))+">  "+stop_err_color+stop_err+bcolors.ENDC)
                 os.chdir("..")
@@ -547,7 +509,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
         print()
         if not no_sm_detected:
             print(bcolors.OKCYAN+f"Writing data to {packfolder}.osz"+bcolors.ENDC)
-            with zipfile.ZipFile(f'..\{packfolder}.osz', 'w') as osz:        
+            with zipfile.ZipFile(os.path.join("..", f"{packfolder}.osz"), 'w') as osz:        
                 for file in output:
                     osz.write(file, compress_type=zipfile.ZIP_DEFLATED)
         else:
@@ -567,7 +529,7 @@ def main(OD, HP, offset, creator, additional_tags, rates, msd_bounds, remove_ln,
             x=f"{TARGET_DIR_SINGLE}.osz"
             if os.path.isfile(os.path.join("..", TARGET_DIR_SINGLE, x)):
                 os.remove(os.path.join("..", TARGET_DIR_SINGLE, x))
-            shutil.move(x, f"..\\{TARGET_DIR_SINGLE}\\{tmpdirname}.osz")
+            shutil.move(x, os.path.join("..", TARGET_DIR_SINGLE, f"{tmpdirname}.osz"))
 
     print()
     print(f"Beatmaps files generated can be found in the {TARGET_DIR} folder")

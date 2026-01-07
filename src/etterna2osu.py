@@ -1,10 +1,9 @@
 # to use in command line: textual console
 
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer
+from textual.widgets import Button, Input, Static, Switch
 from textual.containers import Container, Horizontal, Vertical
 
-from rich.console import RenderableType
 from rich.markdown import Markdown
 from rich.text import Text
 
@@ -12,33 +11,23 @@ import urllib.request, json
 
 import util
 
-from textual.widgets import (
-    Button,
-    Footer,
-    Header,
-    Input,
-    Static,
-    Switch,
-)
-
 # should we update the app
 is_update=False
 update_url=""
 changelog=""
 changelog_name=""
 
-# def clear_note(self) -> None:
-#     self.query_one(TextLog).clear()
-
-# def add_note(self, renderable: RenderableType) -> None:
-#     self.query_one(TextLog).write(renderable)
-
-def notify(self, message):
-    message=message.strip()
-    # add_note(self.app, message+"\n")
-    self.app.bell()
-    message=Text.assemble(message)
-    self.screen.mount(Notification(message))
+# configuration state
+OD=8
+HP=7
+offset=-26
+creator="bobermilk"
+additional_tags=""
+rates=[0,0,0] # initial, step size, number
+msd_bounds=[0,0] #min_msd, max_msd
+remove_ln=False
+diff_name_skillset_msd=[False]*7 # Str, JS, HS, Stamina, JaSp, CJ, Tech
+keep_pitch=True
 
 class Notification(Static):
     def on_mount(self) -> None:
@@ -71,7 +60,7 @@ class Body(Container):
             pass
 
         if not is_update:
-            yield welcome
+            yield Welcome()
 
 class Update(Container):
     def compose(self) -> ComposeResult:
@@ -90,7 +79,8 @@ class Update(Container):
             import webbrowser
             webbrowser.open(update_url)
         else:
-            body.mount(welcome)
+            body = self.app.query_one(Body)
+            body.mount(Welcome())
             self.remove()
 
 class Welcome(Container):
@@ -107,19 +97,10 @@ class Welcome(Container):
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        body = self.app.query_one(Body)
         body.mount(ChartAttributes())
-        welcome.remove()
+        self.remove()
 
-OD=8
-HP=7
-offset=-26
-creator="bobermilk"
-additional_tags=""
-rates=[0,0,0] # initial, step size, number
-msd_bounds=[0,0] #min_msd, max_msd
-remove_ln=False
-diff_name_skillset_msd=[False]*7 # Str, JS, HS, Stamina, JaSp, CJ, Tech
-keep_pitch=True
 
 class ChartAttributes(Container):
     def compose(self) -> ComposeResult:
@@ -201,9 +182,14 @@ class ChartAttributes(Container):
         Static(),
         )
 
+    def notify(self, message):
+        message=message.strip()
+        self.app.bell()
+        message=Text.assemble(message)
+        self.screen.mount(Notification(message))
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         global OD, HP, offset, creator, rates, remove_ln, diff_name_skillset_msd, additional_tags, keep_pitch
-        # clear_note(self.app)
         log_text=""
         notification_text="Configuration Errors:"
         fail=False
@@ -373,10 +359,11 @@ class ChartAttributes(Container):
             log_text+="Warning: Disabling keep audio pitch creates nightcore"
 
         if not notification_text=="Configuration Errors:":
-            notify(self, notification_text)
+            self.notify(notification_text)
         if not fail:
             if show_skillset_msd:
-                body.mount(skillset_msd)
+                body = self.app.query_one(Body)
+                body.mount(SkillsetMsd())
             else:
                 self.app.exit(result=True)
             self.remove()
@@ -437,28 +424,13 @@ class SkillsetMsd(Container):
         self.app.exit(result=True)
 
 
-# LinearLayout (https://textual.textualize.io/guide/layout/)
-body=Body()
-welcome=Welcome()
-configuration=ChartAttributes()
-skillset_msd=SkillsetMsd()
-
 class etterna2osu(App):
     CSS_PATH = "gui.css"
-    BINDINGS = [("ctrl+d", "toggle_dark", "Toggle dark mode"),
-        ("ctrl+c", "app.quit", "Quit"),
-        # ("f1", "app.toggle_class('TextLog', '-hidden')", "Recent Logs"),
-        ]
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
-        yield Header()
-        yield Footer()
-        yield body
+        yield Body()
 
-    def action_toggle_dark(self) -> None:
-        """An action to toggle dark mode."""
-        self.dark = not self.dark
 
 if __name__ == "__main__":
     app = etterna2osu()
